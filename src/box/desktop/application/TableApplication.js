@@ -1,64 +1,72 @@
 import React, {Component} from "react";
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn,} from 'material-ui/Table';
-import GetResponseYesNo from '../../../service/component/GetResponseYesNoService';
+import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import CrudAplication from './CrudApplication';
 import EditIco from 'material-ui/svg-icons/content/create';
 import DeleteIco from 'material-ui/svg-icons/content/delete-sweep';
 import PubSub from 'pubsub-js';
-import TextField from 'material-ui/TextField';
-import CrudProfile from './CrudProfile';
+import applicationService from '../../../service/repository/ApplicationService';
 import data from '../../../service/treats/TreatsData';
-import profileService from '../../../service/repository/ProfileService';
+import GetResponseYesNo from '../../../service/component/GetResponseYesNoService';
+import TextField from 'material-ui/TextField';
+
 
 class TableFind extends Component {
 
     constructor()
     {
         super();
-        this.state = {rows: [], profiles: [],};
+        this.state = { rows: [], applications: []};
     };
 
     componentDidMount()
     {
-        this.fncGetProfiles();
-        PubSub.subscribe('table-update-profiles', this.fncGetProfiles);
+        this.fncGetApplications();
+        PubSub.subscribe('table-update-applications', this.fncGetApplications);
     };
 
-    fncGetProfiles = () =>
+    fncGetApplications = () =>
     {
-        profileService.getAll()
-                      .then(success => this.fncMakeRows(success))
-                      .catch(error =>  console.log(error));
+        applicationService.getAll()
+                          .then(success => this.fncSuccessRequest(success))
+                          .catch(error => console.log(error));
     };
 
-    fncMakeRows = (profiles) =>
+    fncSuccessRequest = (success)=>
     {
-        let rows = profiles.map((profile,index) =>
+        this.setState({applications: success});
+        this.fncMakeRows(success);
+    };
+
+    fncMakeRows = (applications) =>
+    {
+        let rows = applications.map((application, index) =>
             <TableRow key={index}>
-                <TableRowColumn>{data.notNull(profile.name)}</TableRowColumn>
-                <TableRowColumn>{data.notNull(profile.email)}</TableRowColumn>
-                <TableRowColumn>{profile.status ? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn>{data.notNull(application.name)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(application.type)}</TableRowColumn>
+                <TableRowColumn>{application.status ? 'active' : 'deactivated'}</TableRowColumn>
                 <TableRowColumn>
                     <div style={{display:'inline-flex'}}>
-                        <CrudProfile
-                            profile={profile}
+
+                        <CrudAplication
+                            application={application}
                             btLabel={"Edit"}
                             btBackgroundColor={'#00a1fc'}
                             btIcon={<EditIco color='#FFF'/>}
                         />
+
                         <GetResponseYesNo
-                            question={"You really want delete this profile ? ("+profile.email+")"}
-                            fncOnYesCase={() => profileService.delete(profile).then(this.fncGetProfiles)}
+                            question={"You really want delete this application ? ("+application.name+")"}
+                            fncOnYesCase={() => applicationService.delete(application).then(this.fncGetApplications)}
                             btLabel={"delete"}
                             btBackgroundColor={"#ff2930"}
                             btIcon={<DeleteIco color="#fff"/>}
-                            btStyle={{marginLeft: '5%'}}
+                            btStyle={{marginLeft: '3%'}}
                             btLabelStyle={{color: '#fff'}}
                         />
                     </div>
                 </TableRowColumn>
             </TableRow>
         );
-        console.log(rows);
 
         this.setState({'rows': rows});
     };
@@ -71,10 +79,11 @@ class TableFind extends Component {
 
     render()
     {
-        return(
+        return (
+
             <div>
                 <TextField
-                    hintText="Search user"
+                    hintText="Search application"
                     floatingLabelText="Search"
                     type="text"
                     fullWidth={true}
@@ -88,8 +97,8 @@ class TableFind extends Component {
                         displaySelectAll={false}
                         style={this.styles.tableHeader}>
                         <TableRow>
-                            <TableHeaderColumn>User name</TableHeaderColumn>
-                            <TableHeaderColumn>Email</TableHeaderColumn>
+                            <TableHeaderColumn>Name</TableHeaderColumn>
+                            <TableHeaderColumn>Type</TableHeaderColumn>
                             <TableHeaderColumn>Status</TableHeaderColumn>
                             <TableHeaderColumn>Action</TableHeaderColumn>
                         </TableRow>
@@ -100,9 +109,11 @@ class TableFind extends Component {
                         {this.state.rows}
                     </TableBody>
                 </Table>
+
             </div>
+
         )
-    };
+    }
 }
 
 export default TableFind;

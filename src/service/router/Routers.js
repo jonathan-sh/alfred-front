@@ -3,13 +3,15 @@ import AlfredMachines from '../../box/desktop/machine/Machine';
 import AlfredBuilds from '../../box/desktop/builds/Builds';
 import AlfredWebhooks from '../../box/desktop/webhook/WebHook';
 import AlfredAnalytical from '../../box/desktop/analytical/Analytical';
+import AlfredApplication from '../../box/desktop/application/Application';
 
 const DashRoute = 
 {
     dash:
     [
         { uri: "profile", item: AlfredProfile },
-        { uri: "webhooks", item: AlfredWebhooks },
+        { uri: "application", item: AlfredApplication },
+        { uri: "hooks", item: AlfredWebhooks },
         { uri: "machines", item: AlfredMachines },
         { uri: "builds", item: AlfredBuilds },
         { uri: "analytical", item: AlfredAnalytical }

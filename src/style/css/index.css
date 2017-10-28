@@ -30,3 +30,13 @@ p {
     text-align: center;
     margin: auto;
 }
+
+.home-ysnp {
+    background-image: url("./../img/ysnp.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 230px;
+    height: 190px;
+    text-align: center;
+    margin: auto;
+}

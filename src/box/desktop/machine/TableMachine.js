@@ -1,110 +1,72 @@
 import React, {Component} from "react";
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn,} from 'material-ui/Table';
-import httpService from '../../../service/HttpService';
-import RaisedButton from 'material-ui/RaisedButton';
 import EditIco from 'material-ui/svg-icons/content/create';
 import DeleteIco from 'material-ui/svg-icons/content/delete-sweep';
-import BuildIco from 'material-ui/svg-icons/av/playlist-play';
 import PubSub from 'pubsub-js';
-import BuildModal from './BuildModal';
-
+import TextField from 'material-ui/TextField';
+import CrudMachine from './CrudMachine';
+import Build from './BuildModal';
+import GetResponseYesNo from '../../../service/component/GetResponseYesNoService';
+import machineService from '../../../service/repository/MachineService';
+import data from '../../../service/treats/TreatsData';
 
 class TableFind extends Component {
 
-
-    constructor() {
+    constructor()
+    {
         super();
         this.state = { rows: [], machines: []};
-        this.httpService = new httpService();
+    };
 
-    }
-
-    componentDidMount() {
+    componentDidMount()
+    {
         this.fncGetMachines();
         PubSub.subscribe('table-update-machines', this.fncGetMachines);
-    }
-
-    styles = {
-        tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
-        tableBody: {cursor: 'pointer'},
     };
 
-    fncCrudMachine = (machine) => {
-        PubSub.publish('show-crud-machine', machine);
+    fncGetMachines = () =>
+    {
+        machineService.getAll()
+                      .then(success => this.fncSuccessRequest(success))
+                      .catch(error => console.log(error));
     };
 
-    fncDeleteMachine = (machine) => {
-        this.makeDelete(machine);
+    fncSuccessRequest = (success)=>
+    {
+        this.setState({machines: success});
+        this.fncMakeRows(success);
     };
 
-    fncBuildMachine = (machine) => {
-        PubSub.publish('show-build-modal', machine);
-    };
-
-    fncGetMachines = () => {
-        this.httpService.get('/machine', localStorage.getItem('auth-token'))
-            .then(response => {
-                if (response.status === 200) {
-                    return response.json();
-                }
-            })
-            .then(success => {
-                this.setState({machines: success})
-                this.fncMakeRows();
-            })
-            .catch(error => {
-                this.setState({msg: error.message});
-            });
-    };
-
-    makeDelete = (machine) => {
-        this.httpService.delete('/machine', machine, localStorage.getItem('auth-token'))
-            .then(response => {
-                return response;
-            })
-            .then(success => {
-                if (success.status === 200) {
-                    this.fncGetMachines();
-                }
-                if (success.status === 446) {
-                    alert("error");
-                }
-
-            })
-            .catch(error => {
-                console.log(error)
-            });
-
-    };
-
-    fncMakeRows = () => {
-        let rows = this.state.machines.map((machine) =>
+    fncMakeRows = (machines) =>
+    {
+        let rows = machines.map((machine) =>
             <TableRow key={machine._id}>
-                <TableRowColumn>{machine.name}</TableRowColumn>
-                <TableRowColumn>{machine.ip}</TableRowColumn>
-                <TableRowColumn>{machine.status ? 'active' : 'deactivated'}</TableRowColumn>
-                <TableRowColumn>
-                    <RaisedButton
-                        label="build"
-                        backgroundColor="#25576f"
-                        disabled={!machine.status}
-                        onTouchTap={() => this.fncBuildMachine(machine)}
-                        icon={<BuildIco color="#FFF"/>}
-                        labelStyle={{color: 'white'}}/>
-                    <RaisedButton
-                        label="edit"
-                        backgroundColor="#00a1fc"
-                        onTouchTap={() => this.fncCrudMachine(machine)}
-                        style={{marginLeft: '3%'}}
-                        icon={<EditIco color="#FFF"/>}
-                        labelStyle={{color: 'white'}}/>
-                    <RaisedButton
-                        label="delete"
-                        backgroundColor="#ff2930"
-                        onTouchTap={() => this.fncDeleteMachine(machine)}
-                        icon={<DeleteIco color="#FFF"/>}
-                        style={{marginLeft: '3%'}}
-                        labelStyle={{color: 'white'}}/>
+                <TableRowColumn>{data.notNull(machine.name)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(machine.ip)}</TableRowColumn>
+                <TableRowColumn>{machine.status? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn style={this.styles.machineRow}>
+                    <div style={{display:'inline-flex'}}>
+
+                        <Build  machine={machine} />
+
+                        <CrudMachine
+                            machine={machine}
+                            btLabel={"Edit"}
+                            btStyle={{margin: '0 12%'}}
+                            btBackgroundColor={'#00a1fc'}
+                            btIcon={<EditIco color='#FFF'/>}
+                        />
+
+                        <GetResponseYesNo
+                            question={"You really want delete this machine ? ("+machine.name+")"}
+                            fncOnYesCase={() => machineService.delete(machine).then(this.fncGetMachines)}
+                            btLabel={"delete"}
+                            btBackgroundColor={"#ff2930"}
+                            btIcon={<DeleteIco color="#fff"/>}
+                            btStyle={{marginLeft: '20%'}}
+                            btLabelStyle={{color: '#fff'}}
+                        />
+                    </div>
                 </TableRowColumn>
             </TableRow>
         );
@@ -112,11 +74,25 @@ class TableFind extends Component {
         this.setState({'rows': rows});
     };
 
+    styles =
+    {
+        tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
+        tableBody: {cursor: 'pointer'},
+        machineRow: {width: '400px'},
+    };
 
-    render() {
+    render()
+    {
         return (
 
             <div>
+                <TextField
+                    hintText="Search machine"
+                    floatingLabelText="Search"
+                    type="text"
+                    fullWidth={true}
+                    style={{marginBottom:'20px'}}
+                    ref={(input) => this.search = input}/>
                 <Table>
                     <TableHeader
                         adjustForCheckbox={false}
@@ -127,7 +103,7 @@ class TableFind extends Component {
                             <TableHeaderColumn>Machine name</TableHeaderColumn>
                             <TableHeaderColumn>IP</TableHeaderColumn>
                             <TableHeaderColumn>Status</TableHeaderColumn>
-                            <TableHeaderColumn>Action</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.machineRow}>Action</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>
                     <TableBody displayRowCheckbox={false}
@@ -136,13 +112,10 @@ class TableFind extends Component {
                         {this.state.rows}
                     </TableBody>
                 </Table>
-
-                <BuildModal/>
-
             </div>
 
         )
-    }
+    };
 }
 
 export default TableFind;

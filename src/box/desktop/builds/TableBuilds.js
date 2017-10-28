@@ -1,69 +1,78 @@
 import React, {Component} from "react";
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn,} from 'material-ui/Table';
-import httpService from '../../../service/HttpService';
-
+import BuildService from '../../../service/repository/BuildService';
+import TextField from 'material-ui/TextField';
+import MoreInformation from '../webhook/MoreInformation'
+import data from '../../../service/treats/TreatsData';
 
 class TableBuilds extends Component {
 
 
-    constructor() {
+    constructor() 
+    {
         super();
         this.state = {rows: [], builds: [],};
-        this.httpService = new httpService();
-
     }
 
-    componentDidMount() {
-        this.fncWebHooks();
+    componentDidMount()
+    {
+        this.fncGetBuilds();
     }
 
-    styles = {
-        tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
-        tableBody: {cursor: 'pointer'},
-    };
-
-    fncWebHooks = () => {
-        this.httpService.get('/build', localStorage.getItem('auth-token'))
-            .then(response => {
-                if (response.status === 200) {
-                    return response.json();
-                }
-            })
-            .then(success => {
-                this.setState({builds: success})
-                this.fncMakeRows();
-            })
-            .catch(error => {
-                this.setState({msg: error.message});
-            });
+    fncGetBuilds = () =>
+    {
+        BuildService.getAll()
+                    .then(success =>this.fncSuccessRequest(success))
+                    .catch(error => console.log(error));
 
     };
 
-    fncMakeRows = () => {
-        let rows = this.state.builds.map((build) =>
+    fncSuccessRequest = (builds) =>
+    {
+        this.setState({builds: builds});
+        this.fncMakeRows(builds);
+    };
+
+    fncMakeRows = (builds) =>
+    {
+        let rows = builds.map((build) =>
             <TableRow key={build._id}>
-                <TableRowColumn>{build.server.name}</TableRowColumn>
-                <TableRowColumn>{build.application}</TableRowColumn>
-                <TableRowColumn>{build.branch}</TableRowColumn>
-                <TableRowColumn>{build.order}</TableRowColumn>
-                <TableRowColumn>{this.treatsDate(build.dateTime)}</TableRowColumn>
-                <TableRowColumn>{build.status}</TableRowColumn>
-                <TableRowColumn>{build.details}</TableRowColumn>
+                <TableRowColumn>{data.notNull(data.notNull(build.machine).name)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(data.notNull(build.application).name)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(build.branch)}</TableRowColumn>
+                <TableRowColumn>
+                    <MoreInformation message={data.notNull(build.commit)}/>
+                </TableRowColumn>
+                <TableRowColumn>{data.toDate(build.start)}</TableRowColumn>
+                <TableRowColumn>{data.toDate(build.end)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(build.time)}</TableRowColumn>
+                <TableRowColumn>{data.notNull(build.status)}</TableRowColumn>
             </TableRow>
         );
 
         this.setState({'rows': rows});
     };
 
-    treatsDate = (v) =>{
-        return v[2]+'/'+v[1]+'/'+v[0]+' - '+v[3]+':'+v[4];
+    styles = {
+        tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
+        tableBody: {cursor: 'pointer'},
     };
-
 
     render() {
         return (
 
             <div>
+              <span className="display-block">
+                  <TextField
+                      hintText="Search builds"
+                      floatingLabelText="Search"
+                      type="text"
+                      fullWidth={true}
+                      style={this.styles.inputText}
+                      ref={(input) => this.search = input}/>
+                    </span>
+                <br/>
+                <br/>
                 <Table>
                     <TableHeader
                         adjustForCheckbox={false}
@@ -74,10 +83,11 @@ class TableBuilds extends Component {
                             <TableHeaderColumn>Server name</TableHeaderColumn>
                             <TableHeaderColumn>Application</TableHeaderColumn>
                             <TableHeaderColumn>Branch</TableHeaderColumn>
-                            <TableHeaderColumn>Order</TableHeaderColumn>
-                            <TableHeaderColumn>Date</TableHeaderColumn>
+                            <TableHeaderColumn>Commit</TableHeaderColumn>
+                            <TableHeaderColumn>Start</TableHeaderColumn>
+                            <TableHeaderColumn>End</TableHeaderColumn>
+                            <TableHeaderColumn>Time</TableHeaderColumn>
                             <TableHeaderColumn>Status</TableHeaderColumn>
-                            <TableHeaderColumn>Details</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>
                     <TableBody displayRowCheckbox={false}

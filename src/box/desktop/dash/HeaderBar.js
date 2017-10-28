@@ -7,20 +7,23 @@ import PubSub from 'pubsub-js';
 
 class HeaderBar extends Component
 {
-    logOut = () =>
-    {
-       localStorage.removeItem('auth-token');
-       history.push('/');
-    };
 
-    constructor() {
+    constructor()
+    {
         super();
         this.state = {label:''};
         PubSub.subscribe('header-label', this.fncChangeHeaderLabel);
-    }
+    };
 
-    fncChangeHeaderLabel = (key, label)=> {
+    fncChangeHeaderLabel = (key, label)=>
+    {
         this.setState({'label':label});
+    };
+
+    fncLogOut = () =>
+    {
+        localStorage.removeItem('auth-token');
+        history.push('/');
     };
 
     render()
@@ -33,8 +36,7 @@ class HeaderBar extends Component
                     title={this.state.label}
                     iconElementRight=
                     {
-                        <IconButton tooltip="Out"
-                        onTouchTap={this.logOut}>
+                        <IconButton tooltip="Out" onTouchTap={this.fncLogOut}>
                             <LogoutIco/>
                         </IconButton>
                     }

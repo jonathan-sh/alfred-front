@@ -2,97 +2,172 @@ import React, {Component} from "react";
 import PubSub from 'pubsub-js';
 import HighCharts from "highcharts";
 import AddFunnel from "highcharts/modules/funnel";
-import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
+import SelectField from 'material-ui/SelectField';
+import RaisedButton from 'material-ui/RaisedButton';
+import FindIco from 'material-ui/svg-icons/editor/multiline-chart';
+import applicationService from '../../../service/repository/ApplicationService';
+import machineService from '../../../service/repository/MachineService';
+import httpService from '../../../service/http/HttpService';
 
 class Analytical extends Component {
 
-    constructor(props){
+    constructor(props)
+    {
         super(props);
-        this.state = {value: 1};
-    }
+        this.state = { server: 0, application: 0,servers:[], applications:[],  apps:[],series:[], machines:[]};
+    };
 
-    componentDidMount(){
-        PubSub.publish('header-label','Analises');
-        PubSub.subscribe('switch-to-crud', this.fncInCrud);
-        this.setChart();
-    }
+    componentDidMount()
+    {
+        PubSub.publish('header-label','Analytics');
+        this.fncGetMachines();
+        this.fncApplications();
+    };
+    styles =
+    {
+        btn: {width: '15%', marginTop: '2%'}
+    };
 
-    setChart = () =>{
+
+    fncGetMachines = () =>
+    {
+        machineService.getAll()
+                      .then(success =>
+                      {
+                          this.setState({machines: success});
+                          this.fncMakeBoxServer();
+                      })
+                      .catch(error => console.log(error));
+    };
+
+
+    fncApplications = () =>
+    {
+        applicationService.getAll()
+                          .then(success =>
+                          {
+                              this.setState({applications: success});
+                              this.fncMakeBoxApplication();
+                          })
+                          .catch(error => console.log(error));
+
+    };
+
+    getSeries = (data) =>
+    {
+        httpService.make()
+                   .post('/build/analytical',data)
+                   .then(success =>
+                   {
+                       this.setState({series: success});
+                       this.setChart();
+                   })
+                   .catch(error => console.log(error));
+
+    };
+
+    setChart = () =>
+    {
         AddFunnel(HighCharts);
-        HighCharts.chart('chart', {
-
+        HighCharts.chart('chart',{
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie'
+            },
             title: {
-                text: 'Solar Employment Growth by Sector, 2010-2016'
+                text: 'Builds history'
             },
-
-            subtitle: {
-                text: 'Source: thesolarfoundation.com'
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
             },
-
-            yAxis: {
-                title: {
-                    text: 'Number of Employees'
-                }
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle'
-            },
-
             plotOptions: {
-                series: {
-                    pointStart: 2010
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: {
+                            color:'black'
+                        }
+                    }
                 }
             },
-
-            series: [{
-                name: 'Installation',
-                data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-            }, {
-                name: 'Manufacturing',
-                data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-            }, {
-                name: 'Sales & Distribution',
-                data: [11744, 17722, 16005, 19771, 20185, 24377, 32147, 39387]
-            }, {
-                name: 'Project Development',
-                data: [null, null, 7988, 12169, 15112, 22452, 34400, 34227]
-            }, {
-                name: 'Other',
-                data: [12908, 5948, 8105, 11248, 8989, 11816, 18274, 18111]
-            }]
-
+            series: this.state.series
         });
     };
 
-    handleChange = (event, index, value) => this.setState({value});
+    handleChangeServer= (event, index, value) => this.setState({server:value});
 
-    render() {
+    handleChangeApplication = (event, index, value) => this.setState({application:value});
+
+    buildChart = () =>
+    {
+        let appSelected = this.state.application;
+        let machineSelected = this.state.server;
+        let build = {application:{name:this.state.applications[appSelected].name},
+                         machine:{name:this.state.machines[machineSelected].name}};
+
+        this.getSeries(build);
+    };
+
+
+    fncMakeBoxApplication = () =>
+    {
+        let applications = this.state.applications.map((app,index) =>
+            <MenuItem key={index} value={index} primaryText={app.name} />
+        );
+        this.setState({'apps': applications});
+    };
+
+    fncMakeBoxServer = () =>
+    {
+        let servers = this.state.machines.map((server, index) =>
+            <MenuItem key={index} value={index} primaryText={server.name} />
+        );
+
+        this.setState({'servers': servers});
+    };
+
+    render()
+    {
         return (
             <div>
                 <br/>
-                <DropDownMenu value={this.state.value}
-                              onChange={this.handleChange}
-                              autoWidth={false}
-                              style={{width:"50%"}}>
-                    <MenuItem value={1} primaryText="Never" />
-                    <MenuItem value={2} primaryText="Every Night" />
-                    <MenuItem value={3} primaryText="Weeknights" />
-                    <MenuItem value={4} primaryText="Weekends" />
-                    <MenuItem value={5} primaryText="Weekly" />
-                </DropDownMenu>
-                <DropDownMenu value={this.state.value}
-                              onChange={this.handleChange}
-                              autoWidth={false}
-                              style={{width:"50%"}}>
-                    <MenuItem value={1} primaryText="Never" />
-                    <MenuItem value={2} primaryText="Every Night" />
-                    <MenuItem value={3} primaryText="Weeknights" />
-                    <MenuItem value={4} primaryText="Weekends" />
-                    <MenuItem value={5} primaryText="Weekly" />
-                </DropDownMenu>
+
+
+                <SelectField
+                    floatingLabelText="Server"
+                    value={this.state.server}
+                    style={{width:'40%', float:'left', marginRight:'2%'}}
+                    onChange={this.handleChangeServer}
+                >
+                    {this.state.servers}
+                </SelectField>
+
+                <SelectField
+                    floatingLabelText="Application"
+                    value={this.state.application}
+                    style={{width:'40%', float:'left', marginRight:'2%'}}
+                    onChange={this.handleChangeApplication}
+                >
+                    {this.state.apps}
+                </SelectField>
+
+
+                <RaisedButton
+                    label="BUILD CHART"
+                    backgroundColor="#ff7500"
+                    icon={<FindIco color="#FFF"/>}
+                    style={this.styles.btn}
+                    onTouchTap={this.buildChart}
+                    labelStyle={{color: 'white'}}/>
+
+                <br/>
+                <br/>
                 <br/>
                 <br/>
                 <div id="chart">
@@ -101,7 +176,7 @@ class Analytical extends Component {
 
             </div>
         )
-    }
+    };
 }
 
 export default Analytical;

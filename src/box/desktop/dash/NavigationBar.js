@@ -8,11 +8,13 @@ import Marketing from 'material-ui/svg-icons/action/dashboard';
 import CourseIco from 'material-ui/svg-icons/social/school';
 import WebHooksIco from 'material-ui/svg-icons/social/notifications';
 import AnalyticIco from 'material-ui/svg-icons/action/trending-up';
+import ApplicationIco from 'material-ui/svg-icons/navigation/apps';
 import {Link} from 'react-router-dom';
 
 class NavigationBar extends Component 
 {
-    render() {
+    render()
+    {
         return (
             <div>
                 <Drawer open={true} width={200}>
@@ -27,6 +29,13 @@ class NavigationBar extends Component
                         />
                     </Link>
                     <Divider />
+                    <Link to={'/alfred/application'} className={"link-routes"}>
+                        <MenuItem
+                            primaryText="Application"
+                            leftIcon={<ApplicationIco  />}
+                        />
+                    </Link>
+                    <Divider />
                     <Link to={'/alfred/machines'} className={"link-routes"}>
                         <MenuItem
                             primaryText="Machines"
@@ -34,7 +43,7 @@ class NavigationBar extends Component
                         />
                     </Link>
                     <Divider />
-                    <Link to={'/alfred/webhooks'} className={"link-routes"}>
+                    <Link to={'/alfred/hooks'} className={"link-routes"}>
                         <MenuItem
                             primaryText="Hooks"
                             leftIcon={<WebHooksIco/>}

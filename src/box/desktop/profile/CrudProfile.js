@@ -2,115 +2,93 @@ import React, {Component} from "react";
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
-import httpService from '../../../service/HttpService';
 import RaisedButton from 'material-ui/RaisedButton';
-import _ from 'lodash';
 import PubSub from 'pubsub-js';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
+import history from '../../../service/router/History';
+import profileService from '../../../service/repository/ProfileService';
+import _ from 'lodash';
 
 class NewProfile extends Component {
 
-    constructor(props) {
+    constructor(props)
+    {
         super(props);
-        this.httpService = new httpService();
+        this.isUpdate = false;
+        this.label = 'Crate a new user';
         this.state = {
             open: false,
-            isUpdate: false,
             makeSave: false,
-            errorText: {
-                name: '',
-                email: '',
-                level: ''
-            },
-            profile: {
-                _id: null,
-                name: '',
-                email: '',
-                adminLevel: false,
-                status: false
-            }
+            errorText: {name: '', email: '', level: '', password:''},
+            profile:{_id: null, name: '', password: '', email: '', adminLevel: false, status: false}
         };
+    };
 
-    }
-
-    componentWillMount() {
-        PubSub.subscribe('show-crud-profile',this.fillProfileData)
-    }
-
-    fillProfileData = (key, profile) => {
-        if (profile !== undefined && profile !== null)
+    componentWillMount()
+    {
+        if(this.props.isFirstAcess)
         {
-
-            this.setState({'profile': profile, 'isUpdate': true});
+            let profile = {_id: null, name: '', email: '', password: '', adminLevel: true, status: true};
+            this.setState({'profile': profile});
+            this.setState({'open': true});
+            this.label = 'First access';
+            this.isUpdate = false;
         }
-        else
+
+        if(this.props.profile && this.props.profile._id)
         {
-            let profileModal ={_id: null, name: '',email: '', adminLevel: false, status: false};
-            this.setState({'profile': profileModal , 'isUpdate': false, 'makeSave': false});
+            this.setState({'profile':  this.props.profile});
+            this.label = 'Update user';
+            this.isUpdate = true;
         }
-        this.setState({open: true, makeSave: false});
     };
 
-    fncHandleClose = () => {
-        this.setState({open: false});
-    };
-
-    makeSave = () => {
-        if (this.fncValidData()) {
+    makeSave = () =>
+    {
+        if (this.fncValidData())
+        {
             this.setState({makeSave: true});
-            this.httpService.post('/profile', this.state.profile, localStorage.getItem('auth-token'))
-                .then(response => {
-                    return response;
-                })
-                .then(success => {
-                    if (success.status === 200) {
-                        this.fncHandleClose();
-                        PubSub.publish('table-update-profiles', true);
-                    }
-                    if (success.status === 446) {
-                        alert("error");
-                    }
+            profileService.save(this.state.profile)
+                          .then(success =>
+                          {
+                              this.fncHandleClose();
+                              if(this.props.isFirstAcess)
+                              {
+                                  history.push('/');
+                                  document.location.reload(true);
+                              }
+                              else
+                              {
+                                  this.fncSuccessRequest();
+                              }
 
-                })
-                .catch(error => {
-                    console.log(error)
-                });
+                          })
+                          .catch(error => console.log(error));
         }
     };
 
-    makeUpdate = () => {
-        if (this.fncValidData()) {
+    makeUpdate = () =>
+    {
+        if (this.fncValidData())
+        {
             this.setState({makeSave: true});
 
-            this.httpService.put('/profile', this.state.profile, localStorage.getItem('auth-token'))
-                .then(response => {
-                    return response;
-                })
-                .then(success => {
-                    if (success.status === 200) {
-                        this.fncHandleClose();
-                        PubSub.publish('table-update-machines', true);
-                    }
-                    if (success.status === 446) {
-                        alert("error");
-                    }
-
-                })
-                .catch(error => {
-                    console.log(error)
-                });
+            profileService.update(this.state.profile)
+                          .then(success => this.fncSuccessRequest())
+                          .catch(error => console.log(error));
         }
     };
 
-
-    fncValidData = () => {
+    fncValidData = () =>
+    {
         let status = true;
         let profile = this.state.profile;
 
         let errorText = {
             name: '',
-            email: ''
+            email: '',
+            password:''
         };
 
         this.setState({'errorText': errorText});
@@ -128,33 +106,50 @@ class NewProfile extends Component {
 
     };
 
-    fncValidValue = (value) => {
+    fncValidValue = (value) =>
+    {
         return value !== undefined && value !== ""
     };
 
-    setData = (event, value, attribute) => {
+    fncSuccessRequest = () =>
+    {
+        if (!this.isUpdate)
+        {
+            this.setState({profile:{_id: null, name: '', password: '', email: '', adminLevel: false, status: false}});
+            this.setState({errorText:{name: '', email: '', level: '', password:''}});
+        }
+        this.setState({makeSave: false});
+        this.fncHandleClose();
+        PubSub.publish('table-update-profiles', true);
+    };
+
+    fncSetData = (event, value, attribute) =>
+    {
         let profile = this.state.profile;
         profile[attribute] = value;
         this.setState(profile);
     };
 
-    isValid = (obj) => {
-        return obj !== undefined && obj !== null;
-    };
-
-    handleChangeAdminLevel = () => {
+    fncHandleChangeAdminLevel = () =>
+    {
         let profile = this.state.profile;
         profile['adminLevel'] = !this.state.profile.adminLevel;
         this.setState(profile);
     };
 
-    handleChangeStatus = () => {
+    fncHandleChangeStatus = () =>
+    {
         let profile = this.state.profile;
         profile['status'] = !this.state.profile.status;
         this.setState(profile);
     };
 
-    render() {
+    fncHandleClose = () => this.setState({open: false});
+
+    fncHandleOpen = () =>  this.setState({open: true});
+
+    render()
+    {
 
         let actions = [
             <FlatButton
@@ -163,35 +158,42 @@ class NewProfile extends Component {
                 onTouchTap={this.fncHandleClose}
             />,
             <RaisedButton
-                label={(this.isValid(this.state.profile._id)) ? 'Update' : 'Save'}
+                label={(this.isUpdate) ? 'Update' : 'Save'}
                 backgroundColor="#0ac752"
                 labelStyle={{color: 'white'}}
-                onTouchTap={(this.isValid(this.state.profile._id)) ? this.makeUpdate : this.makeSave}
+                onTouchTap={(this.isUpdate) ? this.makeUpdate : this.makeSave}
                 style={{float: 'right', marginRight: '10px'}}/>
             ,
         ];
 
         return (
             <div>
+                <RaisedButton
+                    label={this.props.btLabel}
+                    backgroundColor={this.props.btBackgroundColor}
+                    icon={this.props.btIcon}
+                    style={this.props.btStyle}
+                    onTouchTap={this.fncHandleOpen}
+                    labelStyle={{color: 'white'}}/>
+
                 <Dialog
-                    title='Crate a new user'
+                    title={this.label}
                     actions={actions}
                     modal={true}
                     contentStyle={{width: '80%', maxWidth: 'none'}}
                     open={this.state.open}>
                     {this.state.makeSave ? <LinearProgress mode="indeterminate"/> : null}
 
-
                     <Toggle
                         label="Account is active"
                         defaultToggled={this.state.profile.status}
-                        onToggle={this.handleChangeStatus}
+                        onToggle={this.fncHandleChangeStatus}
                         labelPosition="right"/>
                     <br/>
                     <Toggle
                         label="Account admin level"
                         defaultToggled={this.state.profile.adminLevel}
-                        onToggle={this.handleChangeAdminLevel}
+                        onToggle={this.fncHandleChangeAdminLevel}
                         labelPosition="right"/>
                     <TextField
                         hintText="Name of user"
@@ -200,7 +202,7 @@ class NewProfile extends Component {
                         disabled={this.state.makeSave}
                         errorText={this.state.errorText.name}
                         fullWidth={true}
-                        onChange={(event, value) => this.setData(event, value, 'name')}
+                        onChange={(event, value) => this.fncSetData(event, value, 'name')}
                         value={this.state.profile.name}/>
                     <TextField
                         hintText="Email of user"
@@ -209,14 +211,23 @@ class NewProfile extends Component {
                         disabled={this.state.makeSave}
                         errorText={this.state.errorText.email}
                         fullWidth={true}
-                        onChange={(event, value) => this.setData(event, value, 'email')}
+                        onChange={(event, value) => this.fncSetData(event, value, 'email')}
                         value={this.state.profile.email}/>
+                    <TextField
+                        hintText="Password"
+                        floatingLabelText="Password"
+                        type="password"
+                        disabled={this.state.makeSave}
+                        errorText={this.state.errorText.password}
+                        fullWidth={true}
+                        onChange={(event, value) => this.fncSetData(event, value, 'password')}
+                        value={this.state.profile.password}/>
 
                 </Dialog>
 
             </div>
         );
-    }
+    };
 }
 
 export default NewProfile;
