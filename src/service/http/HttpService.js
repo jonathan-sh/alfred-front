@@ -1,4 +1,4 @@
-const API_URL = "https://alfred.saas-solinftec.com";
+const API_URL = "https://alfred-api.saas-solinftec.com";
 
 
 /**
