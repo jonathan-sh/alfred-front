@@ -1,12 +1,12 @@
-import "./style/css/index.css";
-import React, {Component} from "react";
-import './style/font/font-awesome-4.7.0/css/font-awesome.min.css';
 import FlatButton from 'material-ui/FlatButton';
+import React, {Component} from "react";
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import history from './service/router/History';
 import HttpService from './service/http/HttpService';
 import ProfileCrud from './box/desktop/profile/CrudProfile'
+import './style/font/font-awesome-4.7.0/css/font-awesome.min.css';
+import "./style/css/index.css";
 
 class App extends Component {
 
@@ -66,6 +66,10 @@ class App extends Component {
         {
             this.attempts = 0;
             this.setState({'httpStatus':-1});
+        }
+        else
+        {
+            this.setState({'httpStatus':501});
         }
     };
 
