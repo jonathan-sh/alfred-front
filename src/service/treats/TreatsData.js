@@ -12,13 +12,27 @@ class TreatsDate {
         }
     }
 
+    static toDateString(v){
+        try
+        {
+            return v[2] + '/' + v[1] + '/' + v[0] + ' - ' + v[3] + ':' + v[4];
+        }
+        catch (err)
+        {
+            return "-"
+        }
+
+    }
+
 
     static toDate(v) {
 
-        try {
-            return v[2] + '/' + v[1] + '/' + v[0] + ' - ' + v[3] + ':' + v[4];
+        try
+        {
+            new Date(v[0], v[1], v[2], v[3], v[4])
         }
-        catch (err) {
+        catch (err)
+        {
             return "-"
         }
 

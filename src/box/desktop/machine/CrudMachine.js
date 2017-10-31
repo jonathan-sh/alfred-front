@@ -30,7 +30,8 @@ class NewProfile extends Component {
                 name: '',
                 ip: '',
                 branch: '',
-                status: false
+                status: false,
+                applications:[]
             },
             applications:[],
             rows:[]
@@ -66,7 +67,7 @@ class NewProfile extends Component {
     {
         let rows = applications.map((application, index) =>
 
-            <TableRow key={index}>
+            <TableRow key={index} id={application._id} selected={this.fncIsRowSelected(application._id)}>
                 <TableRowColumn>{application.name}</TableRowColumn>
                 <TableRowColumn>{application.name}</TableRowColumn>
             </TableRow>
@@ -74,6 +75,31 @@ class NewProfile extends Component {
         );
 
         this.setState({'rows': rows});
+    };
+
+    fncIsRowSelected = (id) =>
+    {
+        return _.filter(this.state.machine.applications,(item)=>{return item === id}).length >0;
+    };
+
+
+    fncRowSelected = (item, key) =>
+    {
+        let id = this.state.rows[item].props.id;
+        let selected = this.state.machine.applications;
+
+        if(selected.length ===0 || !this.fncIsRowSelected(id))
+        {
+            selected.push(id);
+        }
+        else
+        {
+            selected = _.filter(this.state.machine.applications,(item)=>{return item !== id});
+        }
+        let  machine = this.state.machine;
+        machine.applications = selected;
+        this.setState({'machine':machine});
+        this.fncMakeRows(this.state.applications);
     };
 
     makeSave = () =>
@@ -147,7 +173,7 @@ class NewProfile extends Component {
     {
         let machine = this.state.machine;
         machine[attribute] = value;
-        this.setState(machine);
+        this.setState({'machine':machine});
     };
 
     fncHandleChangeStatus = () =>
@@ -255,7 +281,8 @@ class NewProfile extends Component {
                             fixedHeader={this.tableStyle.fixedHeader}
                             fixedFooter={this.tableStyle.fixedFooter}
                             selectable={this.tableStyle.selectable}
-                            multiSelectable={this.tableStyle.multiSelectable}>
+                            multiSelectable={this.tableStyle.multiSelectable}
+                            onCellClick ={(item, key) =>{this.fncRowSelected(item, key);}}>
                             <TableHeader
                                 displaySelectAll={this.tableStyle.showCheckboxes}
                                 adjustForCheckbox={this.tableStyle.showCheckboxes}

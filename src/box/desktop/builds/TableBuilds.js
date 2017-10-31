@@ -4,6 +4,7 @@ import BuildService from '../../../service/repository/BuildService';
 import TextField from 'material-ui/TextField';
 import MoreInformation from '../webhook/MoreInformation'
 import data from '../../../service/treats/TreatsData';
+import _ from 'lodash';
 
 class TableBuilds extends Component {
 
@@ -35,6 +36,8 @@ class TableBuilds extends Component {
 
     fncMakeRows = (builds) =>
     {
+        builds = _.forEach(builds, (item) => {return item.z = data.toDate(item.start)});
+        builds = _.reverse(_.sortBy(builds, ['start']));
         let rows = builds.map((build) =>
             <TableRow key={build._id}>
                 <TableRowColumn>{data.notNull(data.notNull(build.machine).name)}</TableRowColumn>
@@ -43,8 +46,8 @@ class TableBuilds extends Component {
                 <TableRowColumn>
                     <MoreInformation message={data.notNull(build.commit)}/>
                 </TableRowColumn>
-                <TableRowColumn>{data.toDate(build.start)}</TableRowColumn>
-                <TableRowColumn>{data.toDate(build.end)}</TableRowColumn>
+                <TableRowColumn>{data.toDateString(build.start)}</TableRowColumn>
+                <TableRowColumn>{data.toDateString(build.end)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(build.time)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(build.status)}</TableRowColumn>
             </TableRow>

@@ -47,7 +47,9 @@ class App extends Component {
         HttpService.make().post('/login', this.makeDataForLogin())
         .then(success =>
         {
+            console.log(success);
             localStorage.setItem('auth-token',success.token);
+            localStorage.setItem('profile',success.entity);
             history.push('/alfred/profile');
         })
         .catch(error =>

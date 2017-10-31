@@ -1,3 +1,4 @@
+import history from '../../service/router/History';
 const API_URL = "https://alfred-api.saas-solinftec.com";
 
 
@@ -57,9 +58,9 @@ class GenericHttpRequest {
                 {
                     return response.json();
                 }
-                if (response.status === 401)
+                if (response.status === 401 || response.status === 501)
                 {
-                    throw this.sendError("unauthorized");
+                    history.push('/');
                 }
                 if (response.status === 404)
                 {

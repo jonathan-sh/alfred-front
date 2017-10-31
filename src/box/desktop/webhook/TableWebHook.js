@@ -35,7 +35,7 @@ class TableWebHook extends Component {
 
     fncMakeRows = (hooks) =>
     {
-        hooks = _.sortBy(hooks, ['pusher.name']);
+        hooks = _.sortBy(hooks, ['order']);
 
         let rows = hooks.map((hook) =>
 
@@ -47,7 +47,7 @@ class TableWebHook extends Component {
                     <MoreInformation message={data.notNull(data.notNull(hook.head_commit).message)}/>
                 </TableRowColumn>
                 <TableRowColumn>{data.notNull(data.notNull(hook.machine).name)}</TableRowColumn>
-                <TableRowColumn style={this.styles.dateRow} >{data.toDate(hook.dateTime)}</TableRowColumn>
+                <TableRowColumn style={this.styles.dateRow} >{data.toDateString(hook.dateTime)}</TableRowColumn>
                 <TableRowColumn>{hook.isValid ? 'valid' : 'not-valid'}</TableRowColumn>
                 <TableRowColumn style={this.styles.detailsRow} >{hook.details}</TableRowColumn>
             </TableRow>
