@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import PubSub from 'pubsub-js';
 import TableBuilds from './TableBuilds';
 
-
 class Builds extends Component {
     componentWillMount()
     {

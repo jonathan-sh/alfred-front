@@ -15,7 +15,11 @@ class TreatsDate {
     static toDateString(v){
         try
         {
-            return v[2] + '/' + v[1] + '/' + v[0] + ' - ' + v[3] + ':' + v[4];
+            return this.addZero(v[2]) + '/' +
+                   this.addZero(v[1]) + '/' +
+                   this.addZero(v[0]) + ' - ' +
+                   this.addZero(v[3]) + ':' +
+                   this.addZero(v[4]);
         }
         catch (err)
         {
@@ -36,6 +40,20 @@ class TreatsDate {
             return "-"
         }
 
+    }
+
+    static addZero(v)
+    {
+        let x = v.toString();
+
+        try
+        {
+            return (x.length!==1)? x : '0'+x;
+        }
+        catch (err)
+        {
+            return "-"
+        }
     }
 
 }

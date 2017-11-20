@@ -37,7 +37,7 @@ class TableBuilds extends Component {
     fncMakeRows = (builds) =>
     {
         builds = _.forEach(builds, (item) => {return item.z = data.toDate(item.start)});
-        builds = _.reverse(_.sortBy(builds, ['start']));
+        builds = _.reverse(_.sortBy(builds, ['order']));
         let rows = builds.map((build) =>
             <TableRow key={build._id}>
                 <TableRowColumn>{data.notNull(data.notNull(build.machine).name)}</TableRowColumn>

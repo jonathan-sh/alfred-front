@@ -47,7 +47,7 @@ class TableFind extends Component {
                 <TableRowColumn style={this.styles.machineRow}>
                     <div style={{display:'inline-flex'}}>
 
-                        <Build  machine={machine} />
+                        <Build  machine={machine} enabled={machine.applications} />
 
                         <CrudMachine
                             machine={machine}

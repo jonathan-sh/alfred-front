@@ -58,8 +58,6 @@ class TableFind extends Component {
                 </TableRowColumn>
             </TableRow>
         );
-        console.log(rows);
-
         this.setState({'rows': rows});
     };
 

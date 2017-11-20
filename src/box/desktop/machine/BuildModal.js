@@ -13,7 +13,9 @@ class BuildModal extends Component {
     constructor(props)
     {
         super(props);
-        this.state ={open: false,applications:[],selected:[]};
+        this.enabled=(props.enabled)? props.enabled : [];
+        this.selected= [];
+        this.state ={open: false,applications:[]};
     };
 
     componentDidMount()
@@ -30,15 +32,28 @@ class BuildModal extends Component {
 
     fncSuccessGetApplications = (success)=>
     {
-        this.setState({applications: success});
-        this.fncMakeRows(success);
+        let all = success;
+        let enable = [];
+        _.forEach(all,(item) =>
+        {
+            _.forEach(this.enabled,(o) =>
+            {
+                if (o === item._id)
+                {
+                    enable.push(item);
+                }
+            });
+        });
+        this.setState({applications: enable});
+        this.fncMakeRows(enable);
     };
 
     fncMakeRows = (applications) =>
     {
         let rows = applications.map((application, index) =>
 
-            <TableRow key={index} id={application._id} selected={this.fncIsRowSelected(application._id)}>
+            <TableRow key={index} id={application._id}
+                      selected={this.fncIsRowSelected(application._id)}>
                 <TableRowColumn>{application.name}</TableRowColumn>
                 <TableRowColumn>{application.name}</TableRowColumn>
             </TableRow>
@@ -50,25 +65,24 @@ class BuildModal extends Component {
 
     fncIsRowSelected = (id) =>
     {
-        return _.filter(this.state.selected,(item)=>{return item === id}).length >0;
+        return _.filter(this.selected,(item)=>{return item === id}).length >0;
     };
 
 
     fncRowSelected = (item) =>
     {
-        let id = this.state.rows[item].props.id;
-        let selected = this.state.selected;
 
-        if(selected.length ===0 || !this.fncIsRowSelected(id))
+        let id = this.state.rows[item].props.id;
+
+        if(this.selected.length ===0 || !this.fncIsRowSelected(id))
         {
-            selected.push(id);
+            this.selected.push(id);
         }
         else
         {
-            selected = _.filter(this.state.selected,(item)=>{return item !== id});
+            this.selected = _.filter(this.selected,(item)=>{return item !== id});
         }
 
-        this.setState({'selected':selected});
         this.fncMakeRows(this.state.applications);
     };
 
@@ -133,7 +147,7 @@ class BuildModal extends Component {
                         fixedFooter={this.tableStyle.fixedFooter}
                         selectable={this.tableStyle.selectable}
                         multiSelectable={this.tableStyle.multiSelectable}
-                        onCellClick ={(item, key) =>{this.fncRowSelected(item, key);}}>
+                        onCellClick ={(item) =>{this.fncRowSelected(item);}}>
                         <TableHeader
                             displaySelectAll={this.tableStyle.showCheckboxes}
                             adjustForCheckbox={this.tableStyle.showCheckboxes}

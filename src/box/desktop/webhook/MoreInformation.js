@@ -35,7 +35,15 @@ class MoreInformation extends React.Component {
                     open={this.state.open}
                     onRequestClose={this.handleClose}
                 >
-                 {this.props.message}
+                    <div style={{textAlign:'center'}}>
+                        <div style={{fontSize:'20px', fontFamily:'monospace'}}>
+                            {this.props.message}
+                        </div>
+                        <br/>
+                        <div style={{marginTop:'10px'}}>
+                            <a target="_blank" href={this.props.url} style={{textDecoration:'none', color:'#000'}}> -- COMMIT --</a>
+                        </div>
+                    </div>
                 </Dialog>
             </div>
         );

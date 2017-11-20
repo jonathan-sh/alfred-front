@@ -1,6 +1,5 @@
 import history from '../../service/router/History';
-const API_URL = "https://alfred-api.saas-solinftec.com";
-
+const API_URL = "https://alfred-api.saas-solinftec.com/";
 
 /**
  * Abstraction of the ~GenericHttpRequest~ for each existing url
