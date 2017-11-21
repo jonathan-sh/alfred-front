@@ -44,7 +44,10 @@ class TableBuilds extends Component {
                 <TableRowColumn>{data.notNull(data.notNull(build.application).name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(build.branch)}</TableRowColumn>
                 <TableRowColumn>
-                    <MoreInformation message={data.notNull(build.commit)}/>
+                    <MoreInformation message={data.notNull(build.commit)}
+                                     log={data.notNull(build.log)}
+                                     status={data.notNull(build.status)}
+                                     url={data.notNull(data.notNull(build.commitUrl))}/>
                 </TableRowColumn>
                 <TableRowColumn>{data.toDateString(build.start)}</TableRowColumn>
                 <TableRowColumn>{data.toDateString(build.end)}</TableRowColumn>
