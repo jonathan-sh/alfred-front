@@ -32,7 +32,7 @@ class HeaderBar extends Component
             <div>
                 <AppBar
                     showMenuIconButton={false}
-                    style={{paddingLeft:'220px'}}
+                    style={{paddingLeft:'220px', position:'fixed'}}
                     title={this.state.label}
                     iconElementRight=
                     {
