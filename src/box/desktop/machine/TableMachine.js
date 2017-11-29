@@ -95,6 +95,7 @@ class TableFind extends Component {
                     ref={(input) => this.search = input}/>
                 <Table>
                     <TableHeader
+                        fixedHeader={true}
                         adjustForCheckbox={false}
                         enableSelectAll={false}
                         displaySelectAll={false}

@@ -87,6 +87,7 @@ styles =
                 <br/>
                 <Table>
                     <TableHeader
+                        fixedHeader={true}
                         adjustForCheckbox={false}
                         enableSelectAll={false}
                         displaySelectAll={false}
