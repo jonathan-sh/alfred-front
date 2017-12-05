@@ -16,10 +16,10 @@ class TreatsDate {
         try
         {
             return this.addZero(v[2]) + '/' +
-                   this.addZero(v[1]) + '/' +
-                   this.addZero(v[0]) + ' - ' +
+                   this.addZero(v[1]) + ' - ' +
                    this.addZero(v[3]) + ':' +
-                   this.addZero(v[4]);
+                   this.addZero(v[4]) + ':' +
+                   this.addZero(v[5]);
         }
         catch (err)
         {
