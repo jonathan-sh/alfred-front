@@ -112,10 +112,10 @@ class BuildModal extends Component {
             let webhooks =
             {
                 ref: (this.branch.input.value) ? this.branch.input.value : "not declared",
-                after: "build-manual",
+                after: "manual-build",
                 head_commit: {
-                    message: "Manual build . Started by " + profileService.getName(),
-                    url: "build-manual"
+                    message: "Manual build. Started by " + profileService.getName(),
+                    url: "manual-build"
                 },
                 repository: {
                     name: app.name,
