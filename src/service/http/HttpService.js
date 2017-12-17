@@ -70,10 +70,7 @@ class GenericHttpRequest {
             });
     }
 
-    sendError(value){
-        let error = value;
-        return error;
-    }
+    sendError(value){return value; }
 
     makeRequestInfo(method,data)
     {
@@ -91,7 +88,8 @@ class GenericHttpRequest {
         let token = localStorage.getItem('auth-token');
         return new Headers({
             'Content-type': 'application/json;charset=UTF-8',
-            'X-Auth-Token': token === undefined ? '-' : token
+            'X-Auth-Token': token === undefined ? '-' : token,
+            'X-GitHub-Event': 'build-manual'
         });
     }
 }

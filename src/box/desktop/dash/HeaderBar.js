@@ -1,45 +1,58 @@
 import React, {Component} from "react";
 import AppBar from 'material-ui/AppBar';
-import IconButton from 'material-ui/IconButton';
 import LogoutIco from 'material-ui/svg-icons/navigation/arrow-forward';
+import FlatButton from 'material-ui/FlatButton';
+import profileService from '../../../service/repository/ProfileService';
 import history from '../../../service/router/History';
 import PubSub from 'pubsub-js';
 
-class HeaderBar extends Component
-{
+class HeaderBar extends Component {
 
-    constructor()
-    {
+    constructor() {
         super();
-        this.state = {label:''};
+        this.state = {label: ''};
         PubSub.subscribe('header-label', this.fncChangeHeaderLabel);
     };
 
-    fncChangeHeaderLabel = (key, label)=>
-    {
-        this.setState({'label':label});
+    fncChangeHeaderLabel = (key, label) => {
+        this.setState({'label': label});
     };
 
-    fncLogOut = () =>
-    {
+    fncLogOut = () => {
         localStorage.removeItem('auth-token');
         history.push('/');
     };
 
-    render()
-    {
+    render() {
         return (
             <div>
                 <AppBar
                     showMenuIconButton={false}
-                    style={{paddingLeft:'220px', position:'fixed'}}
+                    style={{paddingLeft: '220px', position: 'fixed'}}
                     title={this.state.label}
                     iconElementRight=
-                    {
-                        <IconButton tooltip="Out" onTouchTap={this.fncLogOut}>
-                            <LogoutIco/>
-                        </IconButton>
-                    }
+                        {
+
+                            <custom>
+
+                                <FlatButton rippleColor="#fff"
+                                            disabled={true}
+                                            hoverColor="#43bdd4"
+                                            style={{color: "#fff", marginTop: "5px"}}
+                                            label={profileService.getName()}
+                                            secondary={false}
+                                />
+
+                                <FlatButton rippleColor="#fff"
+                                            hoverColor="#43bdd4"
+                                            icon={<LogoutIco color="#fff"/>}
+                                            style={{color: "#fff", marginTop: "5px"}}
+                                            onClick={() => {this.fncLogOut()}}
+                                />
+
+
+                            </custom>
+                        }
                 />
             </div>
         )

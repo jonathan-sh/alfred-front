@@ -48,7 +48,7 @@ class App extends Component {
         .then(success =>
         {
             localStorage.setItem('auth-token',success.token);
-            localStorage.setItem('profile',success.entity);
+            localStorage.setItem('profile',JSON.stringify(success));
             history.push('/alfred/profile');
         })
         .catch(error =>
@@ -77,7 +77,6 @@ class App extends Component {
         return {
                  email:this.email.input.value,
                  password:this.password.input.value,
-                 entity:'provider'
                 }
     };
 
