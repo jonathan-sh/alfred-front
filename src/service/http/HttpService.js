@@ -89,7 +89,7 @@ class GenericHttpRequest {
         return new Headers({
             'Content-type': 'application/json;charset=UTF-8',
             'X-Auth-Token': token === undefined ? '-' : token,
-            'X-GitHub-Event': 'build-manual'
+            'X-GitHub-Event': 'manual-build'
         });
     }
 }

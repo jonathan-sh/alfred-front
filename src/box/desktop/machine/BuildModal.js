@@ -114,7 +114,7 @@ class BuildModal extends Component {
                 ref: (this.branch.input.value) ? this.branch.input.value : "not declared",
                 after: "build-manual",
                 head_commit: {
-                    message: "Build manual. Started by " + profileService.getName(),
+                    message: "Manual build . Started by " + profileService.getName(),
                     url: "build-manual"
                 },
                 repository: {
