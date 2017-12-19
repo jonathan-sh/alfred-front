@@ -1,5 +1,5 @@
 {
-  "name": "sgpa-alfred-front",
+  "name": "alfred-front",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
