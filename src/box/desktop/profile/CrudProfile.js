@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
@@ -6,8 +7,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import PubSub from 'pubsub-js';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
-import history from '../../../service/router/History';
-import profileService from '../../../service/repository/ProfileService';
+import userService from '../../../service/service/UserService';
 import _ from 'lodash';
 
 class NewProfile extends Component {
@@ -20,25 +20,18 @@ class NewProfile extends Component {
         this.state = {
             open: false,
             makeSave: false,
-            errorText: {name: '', email: '', level: '', password:''},
-            profile:{_id: null, name: '', password: '', email: '', adminLevel: false, status: false}
+            errorText: {name: '', email: '', password:''},
+            profile:{id: null, name: '', password: '', email: '', enable: false}
         };
     };
 
     componentWillMount()
     {
-        if(this.props.isFirstAcess)
+        if(this.props.profile && this.props.profile.id)
         {
-            let profile = {_id: null, name: '', email: '', password: '', adminLevel: true, status: true};
-            this.setState({'profile': profile});
-            this.setState({'open': true});
-            this.label = 'First access';
-            this.isUpdate = false;
-        }
-
-        if(this.props.profile && this.props.profile._id)
-        {
-            this.setState({'profile':  this.props.profile});
+            let profile = this.props.profile;
+            profile['password'] ='';
+            this.setState({'profile':  profile});
             this.label = 'Update user';
             this.isUpdate = true;
         }
@@ -49,22 +42,13 @@ class NewProfile extends Component {
         if (this.fncValidData())
         {
             this.setState({makeSave: true});
-            profileService.save(this.state.profile)
-                          .then(success =>
-                          {
-                              this.fncHandleClose();
-                              if(this.props.isFirstAcess)
-                              {
-                                  history.push('/');
-                                  document.location.reload(true);
-                              }
-                              else
-                              {
-                                  this.fncSuccessRequest();
-                              }
-
-                          })
-                          .catch(error => console.log(error));
+            userService.save(this.state.profile)
+                       .then(success =>
+                       {
+                           this.fncHandleClose();
+                           this.fncSuccessRequest();
+                       })
+                       .catch(error => console.log(error));
         }
     };
 
@@ -74,15 +58,15 @@ class NewProfile extends Component {
         {
             this.setState({makeSave: true});
 
-            profileService.update(this.state.profile)
-                          .then(success => this.fncSuccessRequest())
-                          .catch(error => console.log(error));
+            userService.update(this.state.profile)
+                       .then(success => this.fncSuccessRequest())
+                       .catch(error => console.log(error));
         }
     };
 
     fncValidData = () =>
     {
-        let status = true;
+        let enable = true;
         let profile = this.state.profile;
 
         let errorText = {
@@ -95,14 +79,14 @@ class NewProfile extends Component {
 
         _.forEach(profile, (value, key) => {
             if (!this.fncValidValue(value)) {
-                status = false;
-                errorText[key] = 'Informe este campo';
+                enable = false;
+                errorText[key] = 'this is required';
             }
         });
 
         this.setState({'errorText': errorText});
 
-        return status;
+        return enable;
 
     };
 
@@ -115,7 +99,7 @@ class NewProfile extends Component {
     {
         if (!this.isUpdate)
         {
-            this.setState({profile:{_id: null, name: '', password: '', email: '', adminLevel: false, status: false}});
+            this.setState({profile:{id: null, name: '', password: '', email: '', level: 'DEVELOPMENT', enable: false}});
             this.setState({errorText:{name: '', email: '', level: '', password:''}});
         }
         this.setState({makeSave: false});
@@ -130,17 +114,18 @@ class NewProfile extends Component {
         this.setState(profile);
     };
 
-    fncHandleChangeAdminLevel = () =>
+    fncHandleChangeAdminLevel = (event,value) =>
     {
+        console.log(value);
         let profile = this.state.profile;
-        profile['adminLevel'] = !this.state.profile.adminLevel;
-        this.setState(profile);
+        profile['level'] = value;
+        this.setState({'profile':profile});
     };
 
-    fncHandleChangeStatus = () =>
+    fncHandleChangeEnable = () =>
     {
         let profile = this.state.profile;
-        profile['status'] = !this.state.profile.status;
+        profile['enable'] = !this.state.profile.enable;
         this.setState(profile);
     };
 
@@ -184,17 +169,34 @@ class NewProfile extends Component {
                     open={this.state.open}>
                     {this.state.makeSave ? <LinearProgress mode="indeterminate"/> : null}
 
-                    <Toggle
-                        label="Account is active"
-                        defaultToggled={this.state.profile.status}
-                        onToggle={this.fncHandleChangeStatus}
-                        labelPosition="right"/>
-                    <br/>
-                    <Toggle
-                        label="Account admin level"
-                        defaultToggled={this.state.profile.adminLevel}
-                        onToggle={this.fncHandleChangeAdminLevel}
-                        labelPosition="right"/>
+
+                    <div style={{'width':'100%','height':'22px','paddingTop':'22px'}}>
+
+                        <Toggle
+                            style={{'width':'50%','float':'left'}}
+                            label="Account is active"
+                            defaultToggled={this.state.profile.enable}
+                            onToggle={this.fncHandleChangeEnable}
+                            labelPosition="right"/>
+
+                        <span style={{float:'left', width:'auto', marginRight:'2%'}} >Level: </span>
+                        <RadioButtonGroup onChange={(event,value)=>this.fncHandleChangeAdminLevel(event,value)}
+                                          style={{'width':'40%','float':'left'}}
+                                          name="rb_profile_level" defaultSelected="DEVELOPER">
+
+                             <RadioButton
+                                 value="ADMIN"
+                                 label="ADMIN"
+                                 style={{float:'left', width:'auto'}}
+                             />
+                             <RadioButton
+                                 value="DEVELOPER"
+                                 label="DEVELOPER"
+                                 style={{float:'left', width:'auto', marginLeft:'4%'}}
+                             />
+                        </RadioButtonGroup>
+                    </div>
+
                     <TextField
                         hintText="Name of user"
                         floatingLabelText="Name"

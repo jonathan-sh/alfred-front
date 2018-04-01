@@ -3,7 +3,7 @@ import TemplateRepository from "./TemplateRepositoryService";
 class MachineService extends TemplateRepository
 {
     constructor(){
-        super('/machine');
+        super('/slave');
     }
 }
 export default new MachineService();

@@ -40,3 +40,13 @@ p {
     text-align: center;
     margin: auto;
 }
+
+.alien {
+    background-image: url("./../img/alien.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    margin: auto;
+}

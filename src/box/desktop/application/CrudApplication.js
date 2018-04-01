@@ -6,7 +6,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
 import PubSub from 'pubsub-js';
-import applicationService from '../../../service/repository/ApplicationService';
+import applicationService from '../../../service/service/ApplicationService';
 import _ from 'lodash';
 
 class NewProfile extends Component {
@@ -20,14 +20,14 @@ class NewProfile extends Component {
             isUpdate: false,
             makeSave: false,
             errorText: {name: '',type: '' },
-            application: { _id: null, name: '', type: '', status: false }
+            application: { id: null, name: '', type: '', enable: false }
         };
 
     };
 
     componentWillMount()
     {
-        if(this.props.application && this.props.application._id)
+        if(this.props.application && this.props.application.id)
         {
             this.setState({'application':  this.props.application});
             this.label = 'Update application';
@@ -60,7 +60,7 @@ class NewProfile extends Component {
 
     fncValidData = () =>
     {
-        let status = true;
+        let enable = true;
         let application = this.state.application;
 
         let errorText = {
@@ -72,14 +72,14 @@ class NewProfile extends Component {
 
         _.forEach(application, (value, key) => {
             if (!this.fncValidValue(value)) {
-                status = false;
-                errorText[key] = 'Informe este campo';
+                enable = false;
+                errorText[key] = 'This field is required';
             }
         });
 
         this.setState({'errorText': errorText});
 
-        return status;
+        return enable;
 
     };
 
@@ -92,7 +92,7 @@ class NewProfile extends Component {
     {
         if (!this.isUpdate)
         {
-            this.setState({application: {_id: null, name: '', type: '', status: false}});
+            this.setState({application: {id: null, name: '', type: '', enable: false}});
             this.setState({errorText:{name: '', type: ''}});
         }
         this.setState({makeSave: false});
@@ -107,11 +107,11 @@ class NewProfile extends Component {
         this.setState(application);
     };
 
-    fncHandleChangeStatus = () =>
+    fncHandleChangeEnable = () =>
     {
         let application = this.state.application;
 
-        application['status'] = !this.state.application.status;
+        application['enable'] = !this.state.application.enable;
         this.setState(application);
     };
 
@@ -159,8 +159,8 @@ class NewProfile extends Component {
 
                     <Toggle
                         label="Application is active"
-                        defaultToggled={this.state.application.status}
-                        onToggle={this.fncHandleChangeStatus}
+                        defaultToggled={this.state.application.enable}
+                        onToggle={this.fncHandleChangeEnable}
                         labelPosition="right"/>
                     <br/>
 

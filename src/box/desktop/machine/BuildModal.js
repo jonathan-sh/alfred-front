@@ -5,12 +5,11 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import BuildIco from 'material-ui/svg-icons/content/reply-all';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
-import applicationService from '../../../service/repository/ApplicationService';
-import profileService from '../../../service/repository/ProfileService';
+import applicationService from '../../../service/service/ApplicationService';
+import profileService from '../../../service/service/ProfileService';
 import _ from 'lodash';
 import HttpService from "../../../service/http/HttpService";
 import LinearProgress from 'material-ui/LinearProgress';
-
 
 class BuildModal extends Component {
 
@@ -33,8 +32,8 @@ class BuildModal extends Component {
 
     fncGetApplications = () => {
         applicationService.getAll()
-            .then(success => this.fncSuccessGetApplications(success))
-            .catch(error => console.log(error));
+                          .then(success => this.fncSuccessGetApplications(success.applications))
+                          .catch(error => console.log(error));
     };
 
     fncSuccessGetApplications = (success) => {
@@ -42,7 +41,7 @@ class BuildModal extends Component {
         let enable = [];
         _.forEach(all, (item) => {
             _.forEach(this.enabled, (o) => {
-                if (o === item._id) {
+                if (o === item.name) {
                     enable.push(item);
                 }
             });
@@ -54,8 +53,8 @@ class BuildModal extends Component {
     fncMakeRows = (applications) => {
         let rows = applications.map((application, index) =>
 
-            <TableRow key={index} id={application._id}
-                      selected={this.fncIsRowSelected(application._id)}>
+            <TableRow key={index} id={application.id}
+                      selected={this.fncIsRowSelected(application.id)}>
                 <TableRowColumn>{application.name}</TableRowColumn>
                 <TableRowColumn>{application.type}</TableRowColumn>
             </TableRow>
@@ -108,7 +107,7 @@ class BuildModal extends Component {
         this.setState({'count': 0});
         _.forEach(this.selected, (o) =>
         {
-            let app = _.filter(this.state.applications, (f) => {return f._id === o})[0];
+            let app = _.filter(this.state.applications, (f) => {return f.id === o})[0];
             let webhooks =
             {
                 ref: (this.branch.input.value) ? this.branch.input.value : "not declared",
@@ -178,6 +177,7 @@ class BuildModal extends Component {
                     backgroundColor={'#dd2864'}
                     icon={<BuildIco color='#FFF'/>}
                     style={{marginRight: '0'}}
+                    disabled={this.props.disabled}
                     onTouchTap={this.fncHandleOpen}
                     labelStyle={{color: 'white'}}/>
 

@@ -1,5 +1,5 @@
 import history from '../../service/router/History';
-const API_URL = "https://alfred-api.saas-solinftec.com/";
+const API_URL = "http://localhost:4212/v1";
 
 /**
  * Abstraction of the ~GenericHttpRequest~ for each existing url
@@ -43,8 +43,8 @@ class GenericHttpRequest {
         return this.makeRequest('PUT', uri, data);
     }
 
-    deleteOne(uri, data) {
-        return this.makeRequest('DELETE', uri, data);
+    deleteOne(uri) {
+        return this.makeRequest('DELETE', uri);
     }
 
     makeRequest(method, uri, data)

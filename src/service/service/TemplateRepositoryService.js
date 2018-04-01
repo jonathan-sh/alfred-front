@@ -18,14 +18,20 @@ class TemplateRepositoryService
         return HttpService.make().post(this.uri,data);
     }
 
+
+    post(uri, data)
+    {
+        return HttpService.make().post(this.uri+uri,data);
+    }
+
     update(data)
     {
         return HttpService.make().put(this.uri,data);
     }
 
-    delete(data)
+    delete(id)
     {
-        return HttpService.make().deleteOne(this.uri,data);
+        return HttpService.make().deleteOne(this.uri+'/'+id);
     }
 }
 export default TemplateRepositoryService;
