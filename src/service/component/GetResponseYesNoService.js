@@ -56,6 +56,7 @@ export default class GetResponseYesNoService extends React.Component {
                     backgroundColor={this.props.btBackgroundColor}
                     icon={this.props.btIcon}
                     style={this.props.btStyle}
+                    disabled={this.props.disabled}
                     labelStyle={this.props.btLabelStyle}
                     onClick={this.fncHandleOpen} />
                 <Dialog

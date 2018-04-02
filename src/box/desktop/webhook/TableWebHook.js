@@ -1,11 +1,10 @@
 import React, {Component} from "react";
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn,} from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import MoreInformation from './MoreInformation';
+import Avatar from 'material-ui/Avatar';
 import data from '../../../service/treats/TreatsData';
-import webHookService from '../../../service/repository/WebHookService';
+import webHookService from '../../../service/service/WebHookService';
 import _ from 'lodash';
-
+import Link from 'material-ui/svg-icons/content/link';
 
 class TableWebHook extends Component {
 
@@ -27,30 +26,44 @@ class TableWebHook extends Component {
                       .catch(error => console.log(error));
     };
 
-    fncSuccessRequest = (hooks) =>
+    fncSuccessRequest = (success) =>
     {
-        this.setState({hooks: hooks});
-        this.fncMakeRows(hooks);
+        if(!success.not_found)
+        {
+            this.setState({hooks: success.githubwhs});
+            this.fncMakeRows(this.state.hooks);
+        }
+
     };
 
     fncMakeRows = (hooks) =>
     {
-        hooks = _.reverse(_.sortBy(hooks, ['order']));
+        hooks = _.reverse(_.sortBy(hooks, ['id_friendly']));
 
         let rows = hooks.map((hook) =>
 
-            <TableRow key={hook._id} selectable={false}>
-                <TableRowColumn>{data.notNull(data.notNull(hook.pusher).name)}</TableRowColumn>
-                <TableRowColumn>{data.notNull(hook.event)}</TableRowColumn>
-                <TableRowColumn>{data.notNull(hook.ref)}</TableRowColumn>
-                <TableRowColumn>
-                    <MoreInformation message={data.notNull(data.notNull(hook.head_commit).message)}
-                                     url={data.notNull(data.notNull(hook.head_commit).url)}/>
+
+            <TableRow key={hook.id} selectable={false}>
+                <TableRowColumn  style={this.styles.numberRow}>{hook.id_friendly}</TableRowColumn>
+                <TableHeaderColumn style={this.styles.numberRow}>
+                    <Avatar
+                        src={hook.sender.avatar_url}
+                        size={30}
+                        style={{margin: 5}}
+                        data-toggle="tooltip" title={hook.sender.login}
+                    />
+
+                </TableHeaderColumn>
+                <TableRowColumn style={this.styles.eventRow}>{data.notNull(hook.event)}</TableRowColumn>
+                <TableRowColumn style={this.styles.eventRow}>
+                    <a href={data.notNull(hook.head_commit).url} target="_blank" data-toggle="tooltip" title={hook.head_commit.message} >
+                        <Link color={"#a9a9a9"} hoverColor={"#000"}  />
+                    </a>
                 </TableRowColumn>
-                <TableRowColumn>{data.notNull(data.notNull(hook.machine).name)}</TableRowColumn>
-                <TableRowColumn style={this.styles.dateRow} >{data.toDateString(hook.dateTime)}</TableRowColumn>
-                <TableRowColumn>{hook.isValid ? 'valid' : 'not-valid'}</TableRowColumn>
-                <TableRowColumn style={this.styles.detailsRow} >{hook.details}</TableRowColumn>
+                <TableRowColumn style={this.styles.branchRow}>{data.notNull(hook.ref)}</TableRowColumn>
+                <TableRowColumn style={this.styles.dateRow}>{data.notNull(data.notNull(hook.head_commit).timestamp)}</TableRowColumn>
+                <TableRowColumn style={this.styles.statusRow}>{hook.status}</TableRowColumn>
+                <TableRowColumn>{this.getErrors(data.notNull(hook.errors))}</TableRowColumn>
             </TableRow>
         );
 
@@ -58,15 +71,28 @@ class TableWebHook extends Component {
 
     };
 
+    getErrors = (errors) =>
+    {
+        let error ="";
+         _.forEach(errors, (item) => {error = error + ' | ' + item});
+         return error
+    };
 
 
 
-styles =
+
+
+    styles =
     {
         tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
         tableBody: {cursor: 'pointer'},
-        detailsRow: {width: '200px'},
-        dateRow: {width: '120px'},
+        numberRow: {width: '10px'},
+        eventRow: {width: '50px'},
+        branchRow: {width: '100px'},
+        picRow: {width: '10px'},
+        nameRow: {width: '100px'},
+        dateRow: {width: '180px'},
+        statusRow: {width: '100px'},
     };
 
     render()
@@ -74,15 +100,7 @@ styles =
         return (
 
             <div>
-                <span className="display-block">
-                    <TextField
-                        hintText="Search webhook"
-                        floatingLabelText="Search"
-                        type="text"
-                        fullWidth={true}
-                        style={this.styles.inputText}
-                        ref={(input) => this.search = input}/>
-                </span>
+                <br/>
                 <br/>
                 <br/>
                 <Table>
@@ -93,14 +111,14 @@ styles =
                         displaySelectAll={false}
                         style={this.styles.tableHeader}>
                         <TableRow>
-                            <TableHeaderColumn>Pusher</TableHeaderColumn>
-                            <TableHeaderColumn>Event</TableHeaderColumn>
-                            <TableHeaderColumn>Branch</TableHeaderColumn>
-                            <TableHeaderColumn>Commit</TableHeaderColumn>
-                            <TableHeaderColumn>Server name</TableHeaderColumn>
-                            <TableHeaderColumn style={this.styles.dateRow}>Date</TableHeaderColumn>
-                            <TableHeaderColumn>Status</TableHeaderColumn>
-                            <TableHeaderColumn style={this.styles.detailsRow} >Cause</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.numberRow}>Nº</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.numberRow}>Sender</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.eventRow}>Event</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.eventRow}>Commit</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.branchRow}>Branch</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.dateRow}>Timestamp</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.statusRow}>Status</TableHeaderColumn>
+                            <TableHeaderColumn>Errors</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>
                     <TableBody displayRowCheckbox={false}

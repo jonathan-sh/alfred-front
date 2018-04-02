@@ -3,11 +3,11 @@ import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColu
 import EditIco from 'material-ui/svg-icons/content/create';
 import DeleteIco from 'material-ui/svg-icons/content/delete-sweep';
 import PubSub from 'pubsub-js';
-import TextField from 'material-ui/TextField';
 import CrudMachine from './CrudMachine';
 import Build from './BuildModal';
+import authService from '../../../service/service/ProfileService';
 import GetResponseYesNo from '../../../service/component/GetResponseYesNoService';
-import machineService from '../../../service/repository/MachineService';
+import machineService from '../../../service/service/MachineService';
 import data from '../../../service/treats/TreatsData';
 
 class TableFind extends Component {
@@ -24,6 +24,11 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-machines', this.fncGetMachines);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-machines')
+    }
+
     fncGetMachines = () =>
     {
         machineService.getAll()
@@ -33,25 +38,34 @@ class TableFind extends Component {
 
     fncSuccessRequest = (success)=>
     {
-        this.setState({machines: success});
-        this.fncMakeRows(success);
+        if(!success.not_found)
+        {
+            this.setState({machines: success.slaves});
+            this.fncMakeRows(success.slaves);
+        }
+
     };
 
     fncMakeRows = (machines) =>
     {
+
         let rows = machines.map((machine) =>
-            <TableRow key={machine._id}>
+            <TableRow key={machine.id} >
                 <TableRowColumn>{data.notNull(machine.name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(machine.ip)}</TableRowColumn>
-                <TableRowColumn>{machine.status? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn>{machine.enable? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn>{data.notNull(machine.level)}</TableRowColumn>
                 <TableRowColumn style={this.styles.machineRow}>
                     <div style={{display:'inline-flex'}}>
 
-                        <Build  machine={machine} enabled={machine.applications} />
+                        <Build  disabled={!authService.isAdminLevel() && machine.level === 'PRODUCTION'}
+                                machine={machine}
+                                enabled={machine.applications} />
 
                         <CrudMachine
                             machine={machine}
                             btLabel={"Edit"}
+                            disabled={!authService.isAdminLevel() && machine.level === 'PRODUCTION'}
                             btStyle={{margin: '0 12%'}}
                             btBackgroundColor={'#00a1fc'}
                             btIcon={<EditIco color='#FFF'/>}
@@ -59,12 +73,13 @@ class TableFind extends Component {
 
                         <GetResponseYesNo
                             question={"You really want delete this machine ? ("+machine.name+")"}
-                            fncOnYesCase={() => machineService.delete(machine).then(this.fncGetMachines)}
+                            fncOnYesCase={() => machineService.delete(machine.id).then(this.fncGetMachines)}
                             btLabel={"delete"}
                             btBackgroundColor={"#ff2930"}
                             btIcon={<DeleteIco color="#fff"/>}
                             btStyle={{marginLeft: '20%'}}
                             btLabelStyle={{color: '#fff'}}
+                            disabled={!authService.isAdminLevel()}
                         />
                     </div>
                 </TableRowColumn>
@@ -86,13 +101,8 @@ class TableFind extends Component {
         return (
 
             <div>
-                <TextField
-                    hintText="Search machine"
-                    floatingLabelText="Search"
-                    type="text"
-                    fullWidth={true}
-                    style={{marginBottom:'20px'}}
-                    ref={(input) => this.search = input}/>
+                <br/>
+                <br/>
                 <Table>
                     <TableHeader
                         fixedHeader={true}
@@ -103,7 +113,8 @@ class TableFind extends Component {
                         <TableRow>
                             <TableHeaderColumn>Machine name</TableHeaderColumn>
                             <TableHeaderColumn>IP</TableHeaderColumn>
-                            <TableHeaderColumn>Status</TableHeaderColumn>
+                            <TableHeaderColumn>Enable</TableHeaderColumn>
+                            <TableHeaderColumn>Level</TableHeaderColumn>
                             <TableHeaderColumn style={this.styles.machineRow}>Action</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>

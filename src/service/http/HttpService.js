@@ -1,5 +1,5 @@
 import history from '../../service/router/History';
-const API_URL = "https://alfred-api.saas-solinftec.com/";
+const API_URL = "http://localhost:4212/v1";
 
 /**
  * Abstraction of the ~GenericHttpRequest~ for each existing url
@@ -13,6 +13,11 @@ class HttpService {
             this.HTTP_SERVICE_INSTANCE = new GenericHttpRequest(API_URL);
         }
         return this.HTTP_SERVICE_INSTANCE;
+    };
+
+    static getApiUrl= ()=>
+    {
+        return  API_URL;
     };
 
 }
@@ -29,25 +34,27 @@ class GenericHttpRequest {
         this.URL = url;
     }
 
-    get(uri)
+    get = (uri)=>
     {
         return this.makeRequest('GET', uri);
-    }
+    };
 
-    post(uri, data)
+    post = (uri, data)=>
     {
         return this.makeRequest('POST', uri, data);
-    }
+    };
 
-    put(uri, data) {
+    put = (uri, data) =>
+    {
         return this.makeRequest('PUT', uri, data);
-    }
+    };
 
-    deleteOne(uri, data) {
-        return this.makeRequest('DELETE', uri, data);
-    }
+    deleteOne = (uri) =>
+    {
+        return this.makeRequest('DELETE', uri);
+    };
 
-    makeRequest(method, uri, data)
+    makeRequest = (method, uri, data)=>
     {
         let requestInfo = this.makeRequestInfo(method,data);
         return fetch(this.URL + uri, requestInfo)
@@ -57,22 +64,18 @@ class GenericHttpRequest {
                 {
                     return response.json();
                 }
-                if (response.status === 401 || response.status === 501)
-                {
-                    history.push('/');
-                }
-                if (response.status === 404)
-                {
-                    throw this.sendError("not found");
-                }
-                throw this.sendError("http request error");
-
+                history.push('/');
+            })
+            .catch(error =>
+            {
+                console.log(error);
+                history.push('/');
             });
-    }
+    };
 
-    sendError(value){return value; }
+    sendError = (value) => {return value;};
 
-    makeRequestInfo(method,data)
+    makeRequestInfo = (method,data)=>
     {
         let info =
             {
@@ -81,17 +84,17 @@ class GenericHttpRequest {
                 headers:this.makeHeaders()
             };
         return info
-    }
+    };
 
-    makeHeaders()
+    makeHeaders = () =>
     {
         let token = localStorage.getItem('auth-token');
         return new Headers({
             'Content-type': 'application/json;charset=UTF-8',
-            'X-Auth-Token': token === undefined ? '-' : token,
-            'X-GitHub-Event': 'manual-build'
+            'x-auth-token': token,
+            'x-github-event': 'manual-build'
         });
-    }
+    };
 }
 
 

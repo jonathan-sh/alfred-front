@@ -4,10 +4,9 @@ import CrudAplication from './CrudApplication';
 import EditIco from 'material-ui/svg-icons/content/create';
 import DeleteIco from 'material-ui/svg-icons/content/delete-sweep';
 import PubSub from 'pubsub-js';
-import applicationService from '../../../service/repository/ApplicationService';
+import applicationService from '../../../service/service/ApplicationService';
 import data from '../../../service/treats/TreatsData';
 import GetResponseYesNo from '../../../service/component/GetResponseYesNoService';
-import TextField from 'material-ui/TextField';
 
 
 class TableFind extends Component {
@@ -24,6 +23,11 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-applications', this.fncGetApplications);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-applications')
+    }
+
     fncGetApplications = () =>
     {
         applicationService.getAll()
@@ -33,8 +37,12 @@ class TableFind extends Component {
 
     fncSuccessRequest = (success)=>
     {
-        this.setState({applications: success});
-        this.fncMakeRows(success);
+        if(!success.not_found)
+        {
+            this.setState({applications: success.applications});
+            this.fncMakeRows(this.state.applications);
+        }
+
     };
 
     fncMakeRows = (applications) =>
@@ -43,7 +51,7 @@ class TableFind extends Component {
             <TableRow key={index}>
                 <TableRowColumn>{data.notNull(application.name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(application.type)}</TableRowColumn>
-                <TableRowColumn>{application.status ? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn>{application.enable ? 'true' : 'false'}</TableRowColumn>
                 <TableRowColumn>
                     <div style={{display:'inline-flex'}}>
 
@@ -56,7 +64,7 @@ class TableFind extends Component {
 
                         <GetResponseYesNo
                             question={"You really want delete this application ? ("+application.name+")"}
-                            fncOnYesCase={() => applicationService.delete(application).then(this.fncGetApplications)}
+                            fncOnYesCase={() => applicationService.delete(application.id).then(this.fncGetApplications)}
                             btLabel={"delete"}
                             btBackgroundColor={"#ff2930"}
                             btIcon={<DeleteIco color="#fff"/>}
@@ -82,13 +90,7 @@ class TableFind extends Component {
         return (
 
             <div>
-                <TextField
-                    hintText="Search application"
-                    floatingLabelText="Search"
-                    type="text"
-                    fullWidth={true}
-                    style={{marginBottom:'20px'}}
-                    ref={(input) => this.search = input}/>
+                <br/>
                 <br/>
                 <Table>
                     <TableHeader
@@ -99,7 +101,7 @@ class TableFind extends Component {
                         <TableRow>
                             <TableHeaderColumn>Name</TableHeaderColumn>
                             <TableHeaderColumn>Type</TableHeaderColumn>
-                            <TableHeaderColumn>Status</TableHeaderColumn>
+                            <TableHeaderColumn>Enable</TableHeaderColumn>
                             <TableHeaderColumn>Action</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>

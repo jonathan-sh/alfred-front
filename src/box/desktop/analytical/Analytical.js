@@ -2,70 +2,49 @@ import React, {Component} from "react";
 import PubSub from 'pubsub-js';
 import HighCharts from "highcharts";
 import AddFunnel from "highcharts/modules/funnel";
-import MenuItem from 'material-ui/MenuItem';
 import SelectField from 'material-ui/SelectField';
 import RaisedButton from 'material-ui/RaisedButton';
+import MenuItem from 'material-ui/MenuItem';
 import FindIco from 'material-ui/svg-icons/editor/multiline-chart';
-import applicationService from '../../../service/repository/ApplicationService';
-import machineService from '../../../service/repository/MachineService';
-import httpService from '../../../service/http/HttpService';
+import machineService from '../../../service/service/MachineService';
 
 class Analytical extends Component {
 
     constructor(props)
     {
         super(props);
-        this.state = { server: 0, application: 0,servers:[], applications:[],  apps:[],series:[], machines:[]};
+        this.state = { };
     };
 
     componentDidMount()
     {
         PubSub.publish('header-label','Analytics');
         this.fncGetMachines();
-        this.fncApplications();
     };
-    styles =
-    {
-        btn: {width: '15%', marginTop: '2%'}
-    };
-
 
     fncGetMachines = () =>
     {
         machineService.getAll()
                       .then(success =>
                       {
-                          this.setState({machines: success});
-                          this.fncMakeBoxServer();
+                          if(!success.not_found)
+                          {
+                              this.setState({machines: success.slaves});
+                              this.fncMakeBoxServer();
+                          }
                       })
                       .catch(error => console.log(error));
     };
 
-
-    fncApplications = () =>
+    fncMakeBoxServer = () =>
     {
-        applicationService.getAll()
-                          .then(success =>
-                          {
-                              this.setState({applications: success});
-                              this.fncMakeBoxApplication();
-                          })
-                          .catch(error => console.log(error));
+        let servers = this.state.machines.map((server, index) =>
+            <MenuItem key={index} value={index} primaryText={server.name} />
+        );
 
+        this.setState({'servers': servers});
     };
 
-    getSeries = (data) =>
-    {
-        httpService.make()
-                   .post('/build/analytical',data)
-                   .then(success =>
-                   {
-                       this.setState({series: success});
-                       this.setChart();
-                   })
-                   .catch(error => console.log(error));
-
-    };
 
     setChart = () =>
     {
@@ -102,35 +81,6 @@ class Analytical extends Component {
 
     handleChangeServer= (event, index, value) => this.setState({server:value});
 
-    handleChangeApplication = (event, index, value) => this.setState({application:value});
-
-    buildChart = () =>
-    {
-        let appSelected = this.state.application;
-        let machineSelected = this.state.server;
-        let build = {application:{name:this.state.applications[appSelected].name},
-                         machine:{name:this.state.machines[machineSelected].name}};
-
-        this.getSeries(build);
-    };
-
-
-    fncMakeBoxApplication = () =>
-    {
-        let applications = this.state.applications.map((app,index) =>
-            <MenuItem key={index} value={index} primaryText={app.name} />
-        );
-        this.setState({'apps': applications});
-    };
-
-    fncMakeBoxServer = () =>
-    {
-        let servers = this.state.machines.map((server, index) =>
-            <MenuItem key={index} value={index} primaryText={server.name} />
-        );
-
-        this.setState({'servers': servers});
-    };
 
     render()
     {
@@ -142,28 +92,17 @@ class Analytical extends Component {
                 <SelectField
                     floatingLabelText="Server"
                     value={this.state.server}
-                    style={{width:'40%', float:'left', marginRight:'2%'}}
+                    style={{width:'64%',marginRight:'4%',float:'left'}}
                     onChange={this.handleChangeServer}
                 >
                     {this.state.servers}
                 </SelectField>
 
-                <SelectField
-                    floatingLabelText="Application"
-                    value={this.state.application}
-                    style={{width:'40%', float:'left', marginRight:'2%'}}
-                    onChange={this.handleChangeApplication}
-                >
-                    {this.state.apps}
-                </SelectField>
-
-
                 <RaisedButton
-                    label="BUILD CHART"
+                    label="BUILD CHARTS"
                     backgroundColor="#ff7500"
                     icon={<FindIco color="#FFF"/>}
-                    style={this.styles.btn}
-                    onTouchTap={this.buildChart}
+                    style={{width: '32%',float:'left', marginTop:'2.5%'}}
                     labelStyle={{color: 'white'}}/>
 
                 <br/>

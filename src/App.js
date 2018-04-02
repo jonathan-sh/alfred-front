@@ -4,72 +4,32 @@ import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import history from './service/router/History';
 import HttpService from './service/http/HttpService';
-import ProfileCrud from './box/desktop/profile/CrudProfile'
 import './style/font/font-awesome-4.7.0/css/font-awesome.min.css';
 import "./style/css/index.css";
 
 class App extends Component {
 
-    constructor(props)
-    {
+    constructor(props){
         super(props);
-        this.state = {httpStatus : 0, isFirst:0};
-        this.attempts = 0;
-
-    };
-
-    componentWillMount()
-    {
-        HttpService.make().get('/login/is-first')
-        .then(success =>
-        {
-            if(success)
-            {
-                this.setState({'isFirst':1});
-            }
-            else
-            {
-                this.setState({'isFirst':0});
-            }
-        })
-        .catch(error =>
-        {
-             console.log(error);
-        });
-
-    };
+        this.state = {response:0}
+    }
 
     handleClose = () => history.push('/');
 
     makeLogin = () =>
     {
         localStorage.removeItem('auth-token');
-        HttpService.make().post('/login', this.makeDataForLogin())
+        HttpService.make().post('/auth', this.makeDataForLogin())
         .then(success =>
         {
             localStorage.setItem('auth-token',success.token);
-            localStorage.setItem('profile',JSON.stringify(success));
-            history.push('/alfred/profile');
+            localStorage.setItem('profile',JSON.stringify(success.user));
+            history.push('/alfred/build');
         })
         .catch(error =>
         {
-            console.log(error);
-            this.countError();
+            this.setState({'response':401});
         });
-    };
-
-    countError = () =>
-    {
-        this.attempts ++;
-        if (this.attempts === 3)
-        {
-            this.attempts = 0;
-            this.setState({'httpStatus':-1});
-        }
-        else
-        {
-            this.setState({'httpStatus':501});
-        }
     };
 
     makeDataForLogin= () =>
@@ -80,17 +40,16 @@ class App extends Component {
                 }
     };
 
-    resetStatus= () => this.setState({'httpStatus':0});
 
-    getResponse = () =>
+    getResponse = (response) =>
     {
-        switch (this.state.httpStatus)
+        switch (response)
         {
             case 0 :
                 return "";
-            case 501:
+            case 401:
                 return (
-                          <div className="home-ysnp"></div>
+                          <div className="home-ysnp"/>
                        );
             case -1:
                 return (
@@ -105,53 +64,51 @@ class App extends Component {
 
     getStart = () =>
     {
-        switch (this.state.isFirst)
-        {
-            case 0 :
-                return(
-                        <div  style={{width: '60%', margin: 'auto', textAlign: 'center', paddingTop: '2%'}}>
-                        <h3 className="title">Welcome to Alfred</h3>
+        return(
+                <div  style={{width: '30%', margin: 'auto', textAlign: 'center', paddingTop: '2%'}}>
+                <h3 className="title">Welcome to Alfred</h3>
 
-                        <div className="home-logo"></div>
+                <div className="home-logo"/>
 
-                        <TextField
-                            hintText="Email"
-                            floatingLabelText="Email"
-                            type="text"
-                            fullWidth={true}
-                            onChange={this.resetStatus}
-                            ref={(input) => {this.email = input;}}
-                        />
-                        <TextField
-                            hintText="Password"
-                            floatingLabelText="Password"
-                            type="password"
-                            fullWidth={true}
-                            onChange={this.resetStatus}
-                            ref={(input) => {this.password = input;}}
-                        />
-                        <br/>
-                        <br/>
-                        <div style={{textAlign: 'right'}}>
-                            <RaisedButton label="Login"
-                                          onClick={() => this.makeLogin()}
-                                          primary={true}/>
-                        </div>
-                        <br/>
-                        <br/>
-                        {this.getResponse()}
-
-                    </div>
-                      );
-            case 1:
-                return (
-                         <ProfileCrud isFirstAcess={true} />
-                       );
-            default :
-                return "";
-
-        }
-
+                <TextField
+                    hintText="email"
+                    floatingLabelText="Email"
+                    type="text"
+                    fullWidth={true}
+                    onKeyPress={ (e) =>{this.setState({'response':0});}}
+                    ref={(input) => {this.email = input;}}
+                />
+                <TextField
+                    hintText="password"
+                    floatingLabelText="Password"
+                    type="password"
+                    fullWidth={true}
+                    onKeyPress={ (e) =>
+                        {
+                            if (e.key === 'Enter')
+                            {
+                                this.makeLogin()
+                            }
+                            else
+                            {
+                                this.setState({'response':0});
+                            }
+                        }
+                    }
+                    ref={(input) => {this.password = input;}}
+                />
+                <br/>
+                <br/>
+                <div style={{textAlign: 'right'}}>
+                    <RaisedButton label="Login"
+                                  onClick={() => this.makeLogin()}
+                                  primary={true}/>
+                </div>
+                <br/>
+                <br/>
+                {this.getResponse(this.state.response)}
+            </div>
+        );
     };
 
     render()

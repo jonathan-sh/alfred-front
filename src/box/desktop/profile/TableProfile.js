@@ -4,10 +4,9 @@ import GetResponseYesNo from '../../../service/component/GetResponseYesNoService
 import EditIco from 'material-ui/svg-icons/content/create';
 import DeleteIco from 'material-ui/svg-icons/content/delete-sweep';
 import PubSub from 'pubsub-js';
-import TextField from 'material-ui/TextField';
 import CrudProfile from './CrudProfile';
 import data from '../../../service/treats/TreatsData';
-import profileService from '../../../service/repository/ProfileService';
+import profileService from '../../../service/service/UserService';
 
 class TableFind extends Component {
 
@@ -23,22 +22,28 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-profiles', this.fncGetProfiles);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-profiles')
+    }
+
     fncGetProfiles = () =>
     {
         profileService.getAll()
-                      .then(success => this.fncMakeRows(success))
+                      .then(success => this.fncMakeRows(success.users))
                       .catch(error =>  console.log(error));
     };
 
     fncMakeRows = (profiles) =>
     {
-        let rows = profiles.map((profile,index) =>
+        let rows = profiles.map((profile, index) =>
             <TableRow key={index}>
                 <TableRowColumn>{data.notNull(profile.name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(profile.email)}</TableRowColumn>
-                <TableRowColumn>{profile.status ? 'active' : 'deactivated'}</TableRowColumn>
+                <TableRowColumn>{profile.enable ? 'true' : 'false'}</TableRowColumn>
+                <TableRowColumn>{profile.level}</TableRowColumn>
                 <TableRowColumn>
-                    <div style={{display:'inline-flex'}}>
+                    <div style={{display: 'inline-flex'}}>
                         <CrudProfile
                             profile={profile}
                             btLabel={"Edit"}
@@ -46,8 +51,8 @@ class TableFind extends Component {
                             btIcon={<EditIco color='#FFF'/>}
                         />
                         <GetResponseYesNo
-                            question={"You really want delete this profile ? ("+profile.email+")"}
-                            fncOnYesCase={() => profileService.delete(profile).then(this.fncGetProfiles)}
+                            question={"You really want delete this profile ? (" + profile.email + ")"}
+                            fncOnYesCase={() => profileService.delete(profile.id).then(this.fncGetProfiles)}
                             btLabel={"delete"}
                             btBackgroundColor={"#ff2930"}
                             btIcon={<DeleteIco color="#fff"/>}
@@ -59,6 +64,7 @@ class TableFind extends Component {
             </TableRow>
         );
         this.setState({'rows': rows});
+
     };
 
     styles =
@@ -71,13 +77,7 @@ class TableFind extends Component {
     {
         return(
             <div>
-                <TextField
-                    hintText="Search user"
-                    floatingLabelText="Search"
-                    type="text"
-                    fullWidth={true}
-                    style={{marginBottom:'20px'}}
-                    ref={(input) => this.search = input}/>
+                <br/>
                 <br/>
                 <Table>
                     <TableHeader
@@ -89,7 +89,8 @@ class TableFind extends Component {
                         <TableRow>
                             <TableHeaderColumn>User name</TableHeaderColumn>
                             <TableHeaderColumn>Email</TableHeaderColumn>
-                            <TableHeaderColumn>Status</TableHeaderColumn>
+                            <TableHeaderColumn>Enable</TableHeaderColumn>
+                            <TableHeaderColumn>Level</TableHeaderColumn>
                             <TableHeaderColumn>Action</TableHeaderColumn>
                         </TableRow>
                     </TableHeader>

@@ -3,6 +3,7 @@ import PubSub from 'pubsub-js';
 import NewIco from 'material-ui/svg-icons/content/add';
 import TableMachine from './TableMachine';
 import CrudMachine from './CrudMachine';
+import authService from '../../../service/service/ProfileService';
 
 class Machine extends Component {
 
@@ -20,6 +21,7 @@ class Machine extends Component {
                 <CrudMachine
                     machine={null}
                     btLabel={"New"}
+                    disabled={!authService.isAdminLevel()}
                     btBackgroundColor={'#0ac752'}
                     btIcon={<NewIco color='#FFF'/>}
                     btStyle={{width:'100%'}}
