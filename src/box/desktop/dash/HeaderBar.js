@@ -14,13 +14,33 @@ class HeaderBar extends Component {
 
     constructor() {
         super();
-        this.state = {label: '',changePass:false};
+        this.state = {label: '',changePass:false, mounted:false};
         PubSub.subscribe('header-label', this.fncChangeHeaderLabel);
     };
 
-    fncChangeHeaderLabel = (key, label) => {this.setState({'label': label}); };
+
+    componentDidMount()
+    {
+        this.setState({mounted:true});
+    }
+
+    componentWillUnmount()
+    {
+        this.setState({mounted:false});
+        PubSub.unsubscribe('header-label')
+    }
+
+
+    fncChangeHeaderLabel = (key, label) =>
+    {
+        if (this.state.mounted)
+        {
+            this.setState({'label': label});
+        }
+    };
 
     fncLogOut = () => {
+        PubSub.clearAllSubscriptions();
         localStorage.removeItem('auth-token');
         localStorage.removeItem('profile');
         history.push('/');

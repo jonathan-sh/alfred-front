@@ -8,6 +8,11 @@ class TemplateRepositoryService
         this.storageKey = 'stg-'+uri.replace('/','');
     }
 
+    getApiUrl(){
+        return HttpService.getApiUrl();
+    }
+
+
     getAll()
     {
         return HttpService.make().get(this.uri);

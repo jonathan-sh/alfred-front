@@ -69,7 +69,6 @@ class BuildModal extends Component {
         }).length > 0;
     };
 
-
     fncRowSelected = (item) => {
 
         let id = this.state.rows[item].props.id;
@@ -108,25 +107,27 @@ class BuildModal extends Component {
         _.forEach(this.selected, (o) =>
         {
             let app = _.filter(this.state.applications, (f) => {return f.id === o})[0];
-            let webhooks =
+            let wh =
             {
                 ref: (this.branch.input.value) ? this.branch.input.value : "not declared",
+                before: "manual-build",
                 after: "manual-build",
                 head_commit: {
                     message: "Manual build. Started by " + profileService.getName(),
+                    timestamp: new Date(),
                     url: "manual-build"
                 },
                 repository: {
                     name: app.name,
                     full_name: app.name
                 },
-                pusher: {
-                    name: profileService.getName(),
-                    email: profileService.getEmail()
+                sender: {
+                    login: profileService.getName(),
+                    avatar_url: "https://images.dailykos.com/images/227345/story_image/Anonymous_emblem.svg.png?1458574793"
                 }
             };
 
-            HttpService.make().post('/web-hook', webhooks)
+            HttpService.make().post('/wh-git-hub', wh)
                               .then(success => { console.log(success);})
                               .catch(error => {console.log(error);})
                               .finally(() =>

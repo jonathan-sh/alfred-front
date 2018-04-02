@@ -24,7 +24,7 @@ class App extends Component {
         {
             localStorage.setItem('auth-token',success.token);
             localStorage.setItem('profile',JSON.stringify(success.user));
-            history.push('/alfred/webhook');
+            history.push('/alfred/build');
         })
         .catch(error =>
         {
@@ -65,13 +65,13 @@ class App extends Component {
     getStart = () =>
     {
         return(
-                <div  style={{width: '40%', margin: 'auto', textAlign: 'center', paddingTop: '2%'}}>
+                <div  style={{width: '30%', margin: 'auto', textAlign: 'center', paddingTop: '2%'}}>
                 <h3 className="title">Welcome to Alfred</h3>
 
                 <div className="home-logo"/>
 
                 <TextField
-                    hintText="Email"
+                    hintText="email"
                     floatingLabelText="Email"
                     type="text"
                     fullWidth={true}
@@ -79,7 +79,7 @@ class App extends Component {
                     ref={(input) => {this.email = input;}}
                 />
                 <TextField
-                    hintText="Password"
+                    hintText="password"
                     floatingLabelText="Password"
                     type="password"
                     fullWidth={true}

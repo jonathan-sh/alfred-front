@@ -24,15 +24,18 @@ class TableBuilds extends Component {
     fncGetBuilds = () =>
     {
         BuildService.getAll()
-                    .then(success =>this.fncSuccessRequest(success.builds))
+                    .then(success =>this.fncSuccessRequest(success))
                     .catch(error => console.log(error));
 
     };
 
-    fncSuccessRequest = (builds) =>
+    fncSuccessRequest = (success) =>
     {
-        this.setState({builds: builds});
-        this.fncMakeRows(builds);
+        if(!success.not_found)
+        {
+            this.setState({builds: success.builds});
+            this.fncMakeRows(this.state.builds);
+        }
     };
 
     fncMakeRows = (builds) =>
@@ -57,7 +60,7 @@ class TableBuilds extends Component {
                 <TableRowColumn>{data.notNull(data.notNull(build.application).name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(build.branch)}</TableRowColumn>
                 <TableRowColumn style={this.styles.logRow}>
-                    <a href={"http://127.0.0.1:4212/v1/build/log/"+ build.id} target="_blank">
+                    <a href={BuildService.getLogUrl(build.id)} target="_blank">
                         <Log  color={(build.status==='FAIL')? "#ff2930":"#a9a9a9"} hoverColor={"#000"}  />
                     </a>
                 </TableRowColumn>

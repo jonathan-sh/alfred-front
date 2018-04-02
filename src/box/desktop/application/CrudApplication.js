@@ -5,7 +5,6 @@ import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
-import PubSub from 'pubsub-js';
 import applicationService from '../../../service/service/ApplicationService';
 import _ from 'lodash';
 
@@ -97,7 +96,6 @@ class NewProfile extends Component {
         }
         this.setState({makeSave: false});
         this.fncHandleClose();
-        PubSub.publish('table-update-applications', true);
     };
 
     fncSetData = (event, value, attribute) =>
@@ -115,7 +113,10 @@ class NewProfile extends Component {
         this.setState(application);
     };
 
-    fncHandleClose = () => this.setState({open: false});
+    fncHandleClose = () => {
+        window.location.reload();
+        this.setState({open: false})
+    };
 
     fncHandleOpen = () =>  this.setState({open: true});
 

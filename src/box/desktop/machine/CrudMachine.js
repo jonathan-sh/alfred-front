@@ -4,7 +4,6 @@ import {RadioButton, RadioButtonGroup} from 'material-ui/RadioButton';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
-import PubSub from 'pubsub-js';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
 import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
@@ -78,14 +77,17 @@ class NewProfile extends Component {
     fncGetApplications = () =>
     {
         applicationService.getAll()
-            .then(success => this.fncSuccessGetApplications(success.applications))
+            .then(success => this.fncSuccessGetApplications(success))
             .catch(error => console.log(error));
     };
 
     fncSuccessGetApplications = (success)=>
     {
-        this.setState({applications: success});
-        this.fncMakeRows(success);
+        if(!success.not_found)
+        {
+            this.setState({applications: success.applications});
+            this.fncMakeRows(this.state.applications);
+        }
     };
 
     fncMakeRows = (applications) =>
@@ -197,7 +199,7 @@ class NewProfile extends Component {
     {
         this.setState({makeSave: false});
         this.fncHandleClose();
-        PubSub.publish('table-update-machines', true);
+        window.location.reload();
     };
 
     fncSetData = (event, value, attribute) =>
@@ -220,7 +222,10 @@ class NewProfile extends Component {
         this.setState({'machine':machine});
     };
 
-    fncHandleClose = () => this.setState({open: false});
+    fncHandleClose = () => {
+        window.location.reload();
+        this.setState({open: false})
+    };
 
     fncHandleOpen = () =>  this.setState({open: true});
 

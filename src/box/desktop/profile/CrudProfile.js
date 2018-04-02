@@ -4,7 +4,6 @@ import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
-import PubSub from 'pubsub-js';
 import LinearProgress from 'material-ui/LinearProgress';
 import Toggle from 'material-ui/Toggle';
 import userService from '../../../service/service/UserService';
@@ -104,7 +103,7 @@ class NewProfile extends Component {
         }
         this.setState({makeSave: false});
         this.fncHandleClose();
-        PubSub.publish('table-update-profiles', true);
+        window.location.reload();
     };
 
     fncSetData = (event, value, attribute) =>
@@ -129,7 +128,10 @@ class NewProfile extends Component {
         this.setState(profile);
     };
 
-    fncHandleClose = () => this.setState({open: false});
+    fncHandleClose = () => {
+        window.location.reload();
+        this.setState({open: false})
+    };
 
     fncHandleOpen = () =>  this.setState({open: true});
 

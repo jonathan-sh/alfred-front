@@ -24,6 +24,11 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-machines', this.fncGetMachines);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-machines')
+    }
+
     fncGetMachines = () =>
     {
         machineService.getAll()
@@ -33,8 +38,12 @@ class TableFind extends Component {
 
     fncSuccessRequest = (success)=>
     {
-        this.setState({machines: success.slaves});
-        this.fncMakeRows(success.slaves);
+        if(!success.not_found)
+        {
+            this.setState({machines: success.slaves});
+            this.fncMakeRows(success.slaves);
+        }
+
     };
 
     fncMakeRows = (machines) =>

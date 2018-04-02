@@ -4,7 +4,7 @@ import Avatar from 'material-ui/Avatar';
 import data from '../../../service/treats/TreatsData';
 import webHookService from '../../../service/service/WebHookService';
 import _ from 'lodash';
-
+import Link from 'material-ui/svg-icons/content/link';
 
 class TableWebHook extends Component {
 
@@ -22,14 +22,18 @@ class TableWebHook extends Component {
     fncGetWebHooks = () =>
     {
         webHookService.getAll()
-                      .then(success => this.fncSuccessRequest(success.githubwhs))
+                      .then(success => this.fncSuccessRequest(success))
                       .catch(error => console.log(error));
     };
 
-    fncSuccessRequest = (hooks) =>
+    fncSuccessRequest = (success) =>
     {
-        this.setState({hooks: hooks});
-        this.fncMakeRows(hooks);
+        if(!success.not_found)
+        {
+            this.setState({hooks: success.githubwhs});
+            this.fncMakeRows(this.state.hooks);
+        }
+
     };
 
     fncMakeRows = (hooks) =>
@@ -51,7 +55,12 @@ class TableWebHook extends Component {
 
                 </TableHeaderColumn>
                 <TableRowColumn style={this.styles.eventRow}>{data.notNull(hook.event)}</TableRowColumn>
-                <TableRowColumn style={this.styles.eventRow}>{data.notNull(hook.ref)}</TableRowColumn>
+                <TableRowColumn style={this.styles.eventRow}>
+                    <a href={data.notNull(hook.head_commit).url} target="_blank" data-toggle="tooltip" title={hook.head_commit.message} >
+                        <Link color={"#a9a9a9"} hoverColor={"#000"}  />
+                    </a>
+                </TableRowColumn>
+                <TableRowColumn style={this.styles.branchRow}>{data.notNull(hook.ref)}</TableRowColumn>
                 <TableRowColumn style={this.styles.dateRow}>{data.notNull(data.notNull(hook.head_commit).timestamp)}</TableRowColumn>
                 <TableRowColumn style={this.styles.statusRow}>{hook.status}</TableRowColumn>
                 <TableRowColumn>{this.getErrors(data.notNull(hook.errors))}</TableRowColumn>
@@ -78,7 +87,8 @@ class TableWebHook extends Component {
         tableHeader: {backgroundColor: '#f1f1f1', textAlign: 'left', fontSize: '20px'},
         tableBody: {cursor: 'pointer'},
         numberRow: {width: '10px'},
-        eventRow: {width: '100px'},
+        eventRow: {width: '50px'},
+        branchRow: {width: '100px'},
         picRow: {width: '10px'},
         nameRow: {width: '100px'},
         dateRow: {width: '180px'},
@@ -104,7 +114,8 @@ class TableWebHook extends Component {
                             <TableHeaderColumn style={this.styles.numberRow}>Nº</TableHeaderColumn>
                             <TableHeaderColumn style={this.styles.numberRow}>Sender</TableHeaderColumn>
                             <TableHeaderColumn style={this.styles.eventRow}>Event</TableHeaderColumn>
-                            <TableHeaderColumn style={this.styles.eventRow}>Branch</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.eventRow}>Commit</TableHeaderColumn>
+                            <TableHeaderColumn style={this.styles.branchRow}>Branch</TableHeaderColumn>
                             <TableHeaderColumn style={this.styles.dateRow}>Timestamp</TableHeaderColumn>
                             <TableHeaderColumn style={this.styles.statusRow}>Status</TableHeaderColumn>
                             <TableHeaderColumn>Errors</TableHeaderColumn>

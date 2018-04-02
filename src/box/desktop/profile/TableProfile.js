@@ -22,6 +22,11 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-profiles', this.fncGetProfiles);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-profiles')
+    }
+
     fncGetProfiles = () =>
     {
         profileService.getAll()
@@ -31,14 +36,14 @@ class TableFind extends Component {
 
     fncMakeRows = (profiles) =>
     {
-        let rows = profiles.map((profile,index) =>
+        let rows = profiles.map((profile, index) =>
             <TableRow key={index}>
                 <TableRowColumn>{data.notNull(profile.name)}</TableRowColumn>
                 <TableRowColumn>{data.notNull(profile.email)}</TableRowColumn>
                 <TableRowColumn>{profile.enable ? 'true' : 'false'}</TableRowColumn>
-                <TableRowColumn>{profile.level }</TableRowColumn>
+                <TableRowColumn>{profile.level}</TableRowColumn>
                 <TableRowColumn>
-                    <div style={{display:'inline-flex'}}>
+                    <div style={{display: 'inline-flex'}}>
                         <CrudProfile
                             profile={profile}
                             btLabel={"Edit"}
@@ -46,7 +51,7 @@ class TableFind extends Component {
                             btIcon={<EditIco color='#FFF'/>}
                         />
                         <GetResponseYesNo
-                            question={"You really want delete this profile ? ("+profile.email+")"}
+                            question={"You really want delete this profile ? (" + profile.email + ")"}
                             fncOnYesCase={() => profileService.delete(profile.id).then(this.fncGetProfiles)}
                             btLabel={"delete"}
                             btBackgroundColor={"#ff2930"}
@@ -59,6 +64,7 @@ class TableFind extends Component {
             </TableRow>
         );
         this.setState({'rows': rows});
+
     };
 
     styles =

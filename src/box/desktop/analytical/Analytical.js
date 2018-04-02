@@ -27,8 +27,11 @@ class Analytical extends Component {
         machineService.getAll()
                       .then(success =>
                       {
-                          this.setState({machines: success.slaves});
-                          this.fncMakeBoxServer();
+                          if(!success.not_found)
+                          {
+                              this.setState({machines: success.slaves});
+                              this.fncMakeBoxServer();
+                          }
                       })
                       .catch(error => console.log(error));
     };

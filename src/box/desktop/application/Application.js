@@ -11,6 +11,7 @@ class Application extends Component {
         PubSub.publish('header-label', 'Applications');
     };
 
+
     styles =
     {
         inputText: {width: '72%'},

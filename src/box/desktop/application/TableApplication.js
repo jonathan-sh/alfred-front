@@ -23,17 +23,26 @@ class TableFind extends Component {
         PubSub.subscribe('table-update-applications', this.fncGetApplications);
     };
 
+    componentWillUnmount()
+    {
+        PubSub.unsubscribe('table-update-applications')
+    }
+
     fncGetApplications = () =>
     {
         applicationService.getAll()
-                          .then(success => this.fncSuccessRequest(success.applications))
+                          .then(success => this.fncSuccessRequest(success))
                           .catch(error => console.log(error));
     };
 
     fncSuccessRequest = (success)=>
     {
-        this.setState({applications: success});
-        this.fncMakeRows(success);
+        if(!success.not_found)
+        {
+            this.setState({applications: success.applications});
+            this.fncMakeRows(this.state.applications);
+        }
+
     };
 
     fncMakeRows = (applications) =>
